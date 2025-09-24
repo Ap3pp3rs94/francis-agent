@@ -31,3 +31,10 @@ backups/
 
 # test outputs
 test-results.xml
+# build artifacts
+dist/
+build/
+*.egg-info/
+coverage.xml
+.pytest_cache/
+.mypy_cache/
