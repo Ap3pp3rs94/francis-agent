@@ -1,4 +1,5 @@
 # Francis Agent
+![CI](https://github.com/Ap3pp3rs94/francis-agent/actions/workflows/ci.yml/badge.svg)
 
 Local autonomy loop with tools (files, gitops, httpjson, kvstore, search, shell, web).
 
@@ -12,3 +13,4 @@ python .\francis.py
 pre-commit install
 pre-commit run --all-files
 pytest -q
+
