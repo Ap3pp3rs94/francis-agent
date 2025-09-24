@@ -24,9 +24,13 @@ import zipfile
 try:
     from __main__ import Tool, ToolResult, CFG
 except Exception:
+
     class Tool: ...
+
     class ToolResult: ...
+
     CFG = type("CFG", (), {"data": {}})()
+
 
 class ZipperTool(Tool):
     name = "zipper"
@@ -73,26 +77,45 @@ class ZipperTool(Tool):
                 files.append((ap, rp))
         return files
 
-    def _zip_dir(self, src_dir: Path, dest_zip: Path, include: List[str], exclude: List[str], level: int) -> Tuple[bool, str, dict]:
+    def _zip_dir(
+        self,
+        src_dir: Path,
+        dest_zip: Path,
+        include: List[str],
+        exclude: List[str],
+        level: int,
+    ) -> Tuple[bool, str, dict]:
         src_dir = src_dir.resolve()
         count = 0
         mode = zipfile.ZIP_STORED if level <= 0 else zipfile.ZIP_DEFLATED
         dest_zip.parent.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(dest_zip, "w", compression=mode, compresslevel=None if level <= 0 else level) as zf:
+        with zipfile.ZipFile(
+            dest_zip, "w", compression=mode, compresslevel=None if level <= 0 else level
+        ) as zf:
             for ap, rp in self._walk_collect(src_dir, include, exclude):
                 # normalize to forward slashes inside zip
                 zf.write(ap, arcname=str(rp).replace("\\", "/"))
                 count += 1
-        return True, f"Zipped {count} file(s) → {dest_zip}", {"files": count, "dest": str(dest_zip)}
+        return (
+            True,
+            f"Zipped {count} file(s) → {dest_zip}",
+            {"files": count, "dest": str(dest_zip)},
+        )
 
-    def _zip_file(self, src_file: Path, dest_zip: Path, level: int) -> Tuple[bool, str, dict]:
+    def _zip_file(
+        self, src_file: Path, dest_zip: Path, level: int
+    ) -> Tuple[bool, str, dict]:
         mode = zipfile.ZIP_STORED if level <= 0 else zipfile.ZIP_DEFLATED
         dest_zip.parent.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(dest_zip, "w", compression=mode, compresslevel=None if level <= 0 else level) as zf:
+        with zipfile.ZipFile(
+            dest_zip, "w", compression=mode, compresslevel=None if level <= 0 else level
+        ) as zf:
             zf.write(src_file, arcname=src_file.name)
         return True, f"Zipped 1 file → {dest_zip}", {"files": 1, "dest": str(dest_zip)}
 
-    def _unzip(self, src_zip: Path, dest_dir: Path, overwrite: bool) -> Tuple[bool, str, dict]:
+    def _unzip(
+        self, src_zip: Path, dest_dir: Path, overwrite: bool
+    ) -> Tuple[bool, str, dict]:
         if not src_zip.exists():
             return False, "source zip not found", {}
         with zipfile.ZipFile(src_zip, "r") as zf:
@@ -109,7 +132,11 @@ class ZipperTool(Tool):
                 with zf.open(name) as src, open(target, "wb") as dst:
                     dst.write(src.read())
                 extracted += 1
-        return True, f"Extracted {extracted} file(s) → {dest_dir}", {"files": extracted, "dest": str(dest_dir)}
+        return (
+            True,
+            f"Extracted {extracted} file(s) → {dest_dir}",
+            {"files": extracted, "dest": str(dest_dir)},
+        )
 
     def _list(self, src_zip: Path) -> Tuple[bool, str, dict]:
         if not src_zip.exists():
@@ -132,7 +159,11 @@ class ZipperTool(Tool):
         try:
             op = (op or "").lower().strip()
             if op not in {"zip", "unzip", "list"}:
-                return ToolResult(False, f"Unsupported op: {op}", {"supported": ["zip", "unzip", "list"]})
+                return ToolResult(
+                    False,
+                    f"Unsupported op: {op}",
+                    {"supported": ["zip", "unzip", "list"]},
+                )
 
             if op == "zip":
                 if not src or not dest:
@@ -158,7 +189,9 @@ class ZipperTool(Tool):
                 if not src:
                     return ToolResult(False, "unzip requires src", {})
                 src_zip = self._resolve_in_root(src)
-                dest_dir = self._resolve_in_root(dest or (Path("restore") / Path(src).stem).as_posix())
+                dest_dir = self._resolve_in_root(
+                    dest or (Path("restore") / Path(src).stem).as_posix()
+                )
                 ow = str(overwrite).lower() in ("1", "true", "yes", "y")
                 ok, msg, meta = self._unzip(src_zip, dest_dir, ow)
                 return ToolResult(ok, msg, meta)
@@ -173,4 +206,6 @@ class ZipperTool(Tool):
             return ToolResult(False, f"Unsupported op: {op}", {})
 
         except Exception as e:
-            return ToolResult(False, f"{type(e).__name__}: {e}", {"op": op, "src": src, "dest": dest})
+            return ToolResult(
+                False, f"{type(e).__name__}: {e}", {"op": op, "src": src, "dest": dest}
+            )

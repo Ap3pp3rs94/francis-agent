@@ -27,11 +27,15 @@ from typing import Any, Dict, List
 try:
     from __main__ import Tool, ToolResult, CFG
 except Exception:
+
     class Tool: ...
+
     class ToolResult: ...
+
     CFG = type("CFG", (), {"data": {}})()
 
 _VALID_KEY = re.compile(r"^[A-Za-z0-9._-]{1,80}$")
+
 
 class KVStoreTool(Tool):
     name = "kvstore"
@@ -82,13 +86,19 @@ class KVStoreTool(Tool):
                     if prefix and not k.startswith(prefix):
                         continue
                     keys.append(k)
-                return ToolResult(True, "\n".join(sorted(keys)), {"count": len(keys), "prefix": prefix})
+                return ToolResult(
+                    True,
+                    "\n".join(sorted(keys)),
+                    {"count": len(keys), "prefix": prefix},
+                )
 
             if op == "exists":
                 if not key:
                     return ToolResult(False, "Missing 'key'", {})
                 p = self._path_for(key)
-                return ToolResult(True, str(p.exists()).lower(), {"exists": p.exists(), "key": key})
+                return ToolResult(
+                    True, str(p.exists()).lower(), {"exists": p.exists(), "key": key}
+                )
 
             if op == "get":
                 if not key:
@@ -125,7 +135,9 @@ class KVStoreTool(Tool):
                 p = self._path_for(key)
                 base = self._read_json(p) or {}
                 if not isinstance(base, dict):
-                    return ToolResult(False, "existing value is not an object; cannot merge", {})
+                    return ToolResult(
+                        False, "existing value is not an object; cannot merge", {}
+                    )
                 base.update(patch)
                 self._write_json(p, base)
                 return ToolResult(True, f"OK merge {key}", {"key": key, "path": str(p)})
@@ -137,7 +149,9 @@ class KVStoreTool(Tool):
                 p = self._path_for(key)
                 base = self._read_json(p) or {}
                 if not isinstance(base, dict):
-                    return ToolResult(False, "existing value is not an object; cannot incr", {})
+                    return ToolResult(
+                        False, "existing value is not an object; cannot incr", {}
+                    )
                 try:
                     delta = int(by)
                 except Exception:
@@ -147,7 +161,11 @@ class KVStoreTool(Tool):
                     return ToolResult(False, "Target field is not an int", {})
                 base[field] = cur + delta
                 self._write_json(p, base)
-                return ToolResult(True, f"{field} = {base[field]}", {"key": key, "field": field, "value": base[field]})
+                return ToolResult(
+                    True,
+                    f"{field} = {base[field]}",
+                    {"key": key, "field": field, "value": base[field]},
+                )
 
             if op == "delete":
                 if not key:
@@ -158,7 +176,21 @@ class KVStoreTool(Tool):
                     return ToolResult(True, f"deleted {key}", {"key": key})
                 return ToolResult(False, "not found", {"key": key})
 
-            return ToolResult(False, f"Unsupported op: {op}", {"supported": ["get","set","merge","incr","delete","list","exists"]})
+            return ToolResult(
+                False,
+                f"Unsupported op: {op}",
+                {
+                    "supported": [
+                        "get",
+                        "set",
+                        "merge",
+                        "incr",
+                        "delete",
+                        "list",
+                        "exists",
+                    ]
+                },
+            )
 
         except Exception as e:
             return ToolResult(False, f"{type(e).__name__}: {e}", {"op": op, "key": key})

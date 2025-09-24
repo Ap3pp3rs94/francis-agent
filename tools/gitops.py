@@ -11,8 +11,11 @@ from pathlib import Path
 try:
     from __main__ import Tool, ToolResult, CFG
 except Exception:
+
     class Tool: ...
+
     class ToolResult: ...
+
     CFG = type("CFG", (), {"data": {}})()
 
 
@@ -36,7 +39,9 @@ class GitOpsTool(Tool):
             )
             out = (proc.stdout or "") + (proc.stderr or "")
             ok = proc.returncode == 0
-            return ToolResult(ok, out.strip(), {"returncode": proc.returncode, "cwd": str(cwd)})
+            return ToolResult(
+                ok, out.strip(), {"returncode": proc.returncode, "cwd": str(cwd)}
+            )
         except subprocess.TimeoutExpired:
             return ToolResult(False, f"Timed out after {timeout}s", {"cmd": cmd})
         except Exception as e:
@@ -64,14 +69,14 @@ class GitOpsTool(Tool):
             add = self._run_git(f"add {shlex.quote(files)}")
             if not add.ok:
                 return add
-            return self._run_git(f'commit -m {shlex.quote(msg)}')
+            return self._run_git(f"commit -m {shlex.quote(msg)}")
 
         if op == "snapshot":
             msg = message or "chore: snapshot by Francis"
             steps = []
             for step in [
                 f"add {shlex.quote(files)}",
-                f'commit -m {shlex.quote(msg)}',
+                f"commit -m {shlex.quote(msg)}",
             ]:
                 r = self._run_git(step)
                 steps.append((step, r.ok))
@@ -103,4 +108,17 @@ class GitOpsTool(Tool):
                 return ToolResult(False, "Missing 'branch' parameter", {})
             return self._run_git(f"checkout {shlex.quote(branch)}")
 
-        return ToolResult(False, f"Unsupported op: {op}", {"supported": ["status","diff","add-commit","snapshot","tag","checkout"]})
+        return ToolResult(
+            False,
+            f"Unsupported op: {op}",
+            {
+                "supported": [
+                    "status",
+                    "diff",
+                    "add-commit",
+                    "snapshot",
+                    "tag",
+                    "checkout",
+                ]
+            },
+        )

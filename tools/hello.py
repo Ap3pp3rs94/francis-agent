@@ -1,8 +1,11 @@
 try:
     from __main__ import Tool, ToolResult
 except Exception:
+
     class Tool: ...
+
     class ToolResult: ...
+
 
 class HelloTool(Tool):
     name = "hello"

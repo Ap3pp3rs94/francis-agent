@@ -66,25 +66,58 @@ DB_PATH = APP_DIR / "francis.sqlite"
 AUDIT_PATH = LOG_DIR / f"audit-{dt.datetime.now().strftime('%Y%m%d')}.jsonl"
 
 DEFAULT_CFG = {
-    "app": {"name": "Francis", "max_short_term": 800, "dry_run": False, "profile": False},
+    "app": {
+        "name": "Francis",
+        "max_short_term": 800,
+        "dry_run": False,
+        "profile": False,
+    },
     "memory": {"enable_long_term": True, "review_window": 15},
     "policy": {
         "redact_patterns": [
             "(?i)(api[_-]?key|token|password)\s*[:=]\s*([A-Za-z0-9\-_.]+)",
-            "(?i)secret\s*[:=]\s*([^\s]+)"
+            "(?i)secret\s*[:=]\s*([^\s]+)",
         ],
         "max_output_chars": 16000,
     },
     "shell": {
         "timeout_sec": 25,
         "cwd": str(APP_DIR),
-        "allow": ["echo", "dir", "ls", "type", "cat", "python", "pip", "git", "ipconfig", "whoami"],
-        "deny": ["rm", "del", "rmdir", "format", "shutdown", "mkfs", "reg ", "sc ", "bcdedit"],
+        "allow": [
+            "echo",
+            "dir",
+            "ls",
+            "type",
+            "cat",
+            "python",
+            "pip",
+            "git",
+            "ipconfig",
+            "whoami",
+        ],
+        "deny": [
+            "rm",
+            "del",
+            "rmdir",
+            "format",
+            "shutdown",
+            "mkfs",
+            "reg ",
+            "sc ",
+            "bcdedit",
+        ],
         "env_allow": ["PATH", "PYTHONPATH"],
     },
     "files": {"root": str(APP_DIR), "allow_write": True},
-    "web": {"timeout_sec": 18, "user_agent": "FrancisBot/1.0 (+local)", "max_bytes": 900_000, "retries": 2, "backoff": 0.6},
+    "web": {
+        "timeout_sec": 18,
+        "user_agent": "FrancisBot/1.0 (+local)",
+        "max_bytes": 900_000,
+        "retries": 2,
+        "backoff": 0.6,
+    },
 }
+
 
 # ---------- Config ----------
 class Config:
@@ -117,7 +150,7 @@ class Config:
         for k, v in os.environ.items():
             if not k.startswith("FRANCIS_"):
                 continue
-            path = k[len("FRANCIS_"):].lower().split("__")
+            path = k[len("FRANCIS_") :].lower().split("__")
             try:
                 ref = self._cfg
                 for p in path[:-1]:
@@ -140,6 +173,7 @@ class Config:
 
 # ---------- Logging ----------
 
+
 def log_console(msg: str):
     print(msg)
 
@@ -159,8 +193,10 @@ def _rotate_audit(keep: int = 10):
     files = sorted(LOG_DIR.glob("audit-*.jsonl"))
     while len(files) > keep:
         old = files.pop(0)
-        try: old.unlink()
-        except Exception: pass
+        try:
+            old.unlink()
+        except Exception:
+            pass
 
 
 # ---------- Memory ----------
@@ -191,7 +227,7 @@ class ShortTermMemory:
 
     def _save(self):
         if len(self.data) > self.max_items:
-            self.data = self.data[-self.max_items:]
+            self.data = self.data[-self.max_items :]
         self.path.write_text(json.dumps(self.data, indent=2))
 
     def append(self, entry: STEntry):
@@ -230,16 +266,35 @@ class LongTermMemory:
         )
         self.conn.commit()
 
-    def upsert(self, *, id: str, timestamp: str, kind: str, ref_id: str, content: str, extra: dict | None = None):
+    def upsert(
+        self,
+        *,
+        id: str,
+        timestamp: str,
+        kind: str,
+        ref_id: str,
+        content: str,
+        extra: dict | None = None,
+    ):
         cur = self.conn.cursor()
         cur.execute(
             "INSERT OR REPLACE INTO entries (id, timestamp, kind, ref_id, extra) VALUES (?,?,?,?,?)",
             (id, timestamp, kind, ref_id, json.dumps(extra or {})),
         )
-        cur.execute("INSERT OR REPLACE INTO entries_fts (id, content) VALUES (?,?)", (id, content))
+        cur.execute(
+            "INSERT OR REPLACE INTO entries_fts (id, content) VALUES (?,?)",
+            (id, content),
+        )
         self.conn.commit()
 
-    def search(self, query: str, *, limit: int = 20, kinds: Optional[List[str]] = None, since: Optional[str] = None) -> List[Dict[str, Any]]:
+    def search(
+        self,
+        query: str,
+        *,
+        limit: int = 20,
+        kinds: Optional[List[str]] = None,
+        since: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
         cur = self.conn.cursor()
         q = query.replace('"', '""')
         sql = textwrap.dedent(
@@ -263,7 +318,16 @@ class LongTermMemory:
         params.append(limit)
         cur.execute(sql, params)
         rows = cur.fetchall()
-        return [{"id": r[0], "timestamp": r[1], "kind": r[2], "ref_id": r[3], "snippet": r[4]} for r in rows]
+        return [
+            {
+                "id": r[0],
+                "timestamp": r[1],
+                "kind": r[2],
+                "ref_id": r[3],
+                "snippet": r[4],
+            }
+            for r in rows
+        ]
 
     def backup(self, dest: Path):
         self.conn.commit()
@@ -290,7 +354,11 @@ class Tool:
         return ToolResult(False, "unimplemented", {})
 
     def _truncate(self, s: str, max_chars: int) -> Tuple[str, bool]:
-        return (s, False) if len(s) <= max_chars else (s[:max_chars] + "\n… [truncated]", True)
+        return (
+            (s, False)
+            if len(s) <= max_chars
+            else (s[:max_chars] + "\n… [truncated]", True)
+        )
 
     def _redact(self, s: str, patterns: List[str]) -> str:
         for pat in patterns:
@@ -313,13 +381,30 @@ class ShellTool(Tool):
         cwd = Path(shcfg["cwd"]).resolve()
         base = Path(shlex.split(cmd, posix=False)[0]).name.lower() if cmd else ""
         if base in deny or (allow and base not in allow):
-            return ToolResult(False, f"Command '{base}' not allowed by policy.", {"cmd": cmd})
+            return ToolResult(
+                False, f"Command '{base}' not allowed by policy.", {"cmd": cmd}
+            )
         try:
-            proc = subprocess.run(cmd, shell=True, cwd=str(cwd), capture_output=True, text=True, timeout=timeout)
+            proc = subprocess.run(
+                cmd,
+                shell=True,
+                cwd=str(cwd),
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+            )
             out = (proc.stdout or "") + (proc.stderr or "")
             out = self._redact(out, policy["redact_patterns"])
             out, truncated = self._truncate(out, policy["max_output_chars"])
-            return ToolResult(proc.returncode == 0, out.strip(), {"returncode": proc.returncode, "cwd": str(cwd), "truncated": truncated})
+            return ToolResult(
+                proc.returncode == 0,
+                out.strip(),
+                {
+                    "returncode": proc.returncode,
+                    "cwd": str(cwd),
+                    "truncated": truncated,
+                },
+            )
         except subprocess.TimeoutExpired:
             return ToolResult(False, f"Timed out after {timeout}s", {"cmd": cmd})
         except Exception as e:
@@ -343,14 +428,20 @@ class FileTool(Tool):
             if op == "read":
                 data = p.read_text(encoding="utf-8")
                 data = self._redact(data, CFG.data["policy"]["redact_patterns"])
-                data, truncated = self._truncate(data, CFG.data["policy"]["max_output_chars"])
+                data, truncated = self._truncate(
+                    data, CFG.data["policy"]["max_output_chars"]
+                )
                 return ToolResult(True, data, {"path": str(p), "truncated": truncated})
             if op == "write":
                 if not CFG.data["files"]["allow_write"]:
-                    return ToolResult(False, "Writes disabled by policy.", {"path": str(p)})
+                    return ToolResult(
+                        False, "Writes disabled by policy.", {"path": str(p)}
+                    )
                 p.parent.mkdir(parents=True, exist_ok=True)
                 p.write_text(content or "", encoding="utf-8")
-                return ToolResult(True, f"Wrote {p}", {"bytes": len((content or '').encode('utf-8'))})
+                return ToolResult(
+                    True, f"Wrote {p}", {"bytes": len((content or "").encode("utf-8"))}
+                )
             return ToolResult(False, "Unsupported op (read|write)", {"op": op})
         except Exception as e:
             return ToolResult(False, str(e), {"op": op, "path": path})
@@ -371,12 +462,15 @@ class WebTool(Tool):
         for attempt in range(retries + 1):
             try:
                 if requests:
-                    resp = requests.get(url, timeout=timeout, headers={"User-Agent": ua}, stream=True)
+                    resp = requests.get(
+                        url, timeout=timeout, headers={"User-Agent": ua}, stream=True
+                    )
                     resp.raise_for_status()
                     data = resp.raw.read(max_bytes, decode_content=True)
                     text = data.decode(resp.encoding or "utf-8", errors="ignore")
                 else:
                     from urllib.request import Request, urlopen
+
                     req = Request(url, headers={"User-Agent": ua})
                     with urlopen(req, timeout=timeout) as r:  # type: ignore
                         text = r.read(max_bytes).decode("utf-8", errors="ignore")
@@ -384,12 +478,14 @@ class WebTool(Tool):
                 text = re.sub(r"<style[\s\S]*?</style>", "", text, flags=re.I)
                 text = re.sub(r"<[^>]+>", " ", text)
                 text = re.sub(r"\s+", " ", text).strip()
-                text, truncated = self._truncate(text, CFG.data["policy"]["max_output_chars"])
+                text, truncated = self._truncate(
+                    text, CFG.data["policy"]["max_output_chars"]
+                )
                 return ToolResult(True, text, {"truncated": truncated})
             except Exception as e:
                 err = str(e)
                 if attempt < retries:
-                    time.sleep(backoff * (2 ** attempt))
+                    time.sleep(backoff * (2**attempt))
         return ToolResult(False, err or "unknown error", {"url": url})
 
 
@@ -417,13 +513,18 @@ class ToolRegistry:
             try:
                 spec.loader.exec_module(mod)  # type: ignore
                 for obj in vars(mod).values():
-                    if isinstance(obj, type) and issubclass(obj, Tool) and obj is not Tool:
+                    if (
+                        isinstance(obj, type)
+                        and issubclass(obj, Tool)
+                        and obj is not Tool
+                    ):
                         self.register(obj(CFG.data))
             except Exception as e:
                 log_console(f"[warn] Failed to load plugin {path.name}: {e}")
 
 
 # ---------- Francis Core ----------
+
 
 def now_iso() -> str:
     return dt.datetime.now().isoformat(timespec="seconds")
@@ -438,13 +539,17 @@ class Francis:
         self.cfg = cfg
         self.app_name = cfg.data["app"]["name"]
         self.st = ShortTermMemory(MEMORY_JSON, cfg.data["app"]["max_short_term"])
-        self.lt = LongTermMemory(DB_PATH) if cfg.data["memory"]["enable_long_term"] else None
+        self.lt = (
+            LongTermMemory(DB_PATH) if cfg.data["memory"]["enable_long_term"] else None
+        )
         self.tools = ToolRegistry()
         self.tools.register(ShellTool(cfg.data))
         self.tools.register(FileTool(cfg.data))
         self.tools.register(WebTool(cfg.data))
         self.tools.load_plugins()
-        log_console(f"[{now_iso()}] {self.app_name} ready. Tools: {', '.join(self.tools.names())}")
+        log_console(
+            f"[{now_iso()}] {self.app_name} ready. Tools: {', '.join(self.tools.names())}"
+        )
         log_audit("startup", {"tools": self.tools.names()})
 
     # -------- Planner v2 --------
@@ -456,34 +561,86 @@ class Francis:
         parts = [p.strip() for p in re.split(r"\s*&&\s*", g)]
         for p in parts:
             pl = p.lower()
-            if pl.startswith("open ") and (pl.endswith(".txt") or pl.endswith(".md") or pl.endswith(".py")):
+            if pl.startswith("open ") and (
+                pl.endswith(".txt") or pl.endswith(".md") or pl.endswith(".py")
+            ):
                 path = p.split(" ", 1)[1]
-                actions.append({"tool": "files", "args": {"op": "read", "path": path}, "explain": f"Read file: {path}"})
+                actions.append(
+                    {
+                        "tool": "files",
+                        "args": {"op": "read", "path": path},
+                        "explain": f"Read file: {path}",
+                    }
+                )
             elif pl.startswith("write ") and ":" in p:
                 _, rest = p.split(" ", 1)
                 path, content = rest.split(":", 1)
-                actions.append({"tool": "files", "args": {"op": "write", "path": path.strip(), "content": content}, "explain": f"Write file: {path.strip()}"})
+                actions.append(
+                    {
+                        "tool": "files",
+                        "args": {
+                            "op": "write",
+                            "path": path.strip(),
+                            "content": content,
+                        },
+                        "explain": f"Write file: {path.strip()}",
+                    }
+                )
             elif pl.startswith("run "):
                 cmd = p.split(" ", 1)[1]
-                actions.append({"tool": "shell", "args": {"cmd": cmd}, "explain": f"Shell: {cmd}"})
-            elif pl.startswith("fetch ") and p.split(" ",1)[1].startswith("http"):
+                actions.append(
+                    {"tool": "shell", "args": {"cmd": cmd}, "explain": f"Shell: {cmd}"}
+                )
+            elif pl.startswith("fetch ") and p.split(" ", 1)[1].startswith("http"):
                 url = p.split(" ", 1)[1].strip()
-                actions.append({"tool": "web", "args": {"url": url}, "explain": f"Fetch URL: {url}"})
+                actions.append(
+                    {
+                        "tool": "web",
+                        "args": {"url": url},
+                        "explain": f"Fetch URL: {url}",
+                    }
+                )
             else:
                 # keyword routing
                 if any(k in pl for k in ("git ", "python ", "pip ")):
-                    actions.append({"tool": "shell", "args": {"cmd": p}, "explain": f"Shell (keyword): {p}"})
+                    actions.append(
+                        {
+                            "tool": "shell",
+                            "args": {"cmd": p},
+                            "explain": f"Shell (keyword): {p}",
+                        }
+                    )
                 else:
-                    actions.append({"tool": "shell", "args": {"cmd": f"echo {shlex.quote(p)}"}, "explain": "Echo for traceability"})
+                    actions.append(
+                        {
+                            "tool": "shell",
+                            "args": {"cmd": f"echo {shlex.quote(p)}"},
+                            "explain": "Echo for traceability",
+                        }
+                    )
         return actions
 
     # -------- Risk & confirm --------
     def risk_score(self, action: Dict[str, Any]) -> Tuple[int, str]:
-        t = action.get("tool"); a = action.get("args", {})
+        t = action.get("tool")
+        a = action.get("args", {})
         score, reason = 1, "low"
         if t == "shell":
             cmd = a.get("cmd", "").lower()
-            if any(d in cmd for d in ["rm", "del", "rmdir", "format", "shutdown", "mkfs", "reg ", "sc ", "bcdedit"]):
+            if any(
+                d in cmd
+                for d in [
+                    "rm",
+                    "del",
+                    "rmdir",
+                    "format",
+                    "shutdown",
+                    "mkfs",
+                    "reg ",
+                    "sc ",
+                    "bcdedit",
+                ]
+            ):
                 return 9, "dangerous shell verb"
             if "git " in cmd:
                 score, reason = 5, "git side-effects"
@@ -495,7 +652,9 @@ class Francis:
 
     def confirm(self, action: Dict[str, Any], score: int, reason: str) -> bool:
         if self.cfg.data["app"]["dry_run"]:
-            log_console(f"[dry-run] {action['tool']} {action['args']} (risk={score}:{reason})")
+            log_console(
+                f"[dry-run] {action['tool']} {action['args']} (risk={score}:{reason})"
+            )
             return False
         if score >= 5:
             print(hrule())
@@ -506,35 +665,81 @@ class Francis:
         return True
 
     # -------- Reflection --------
-    def reflect(self, goal: str, actions: List[Dict[str, Any]], results: List[ToolResult]) -> str:
+    def reflect(
+        self, goal: str, actions: List[Dict[str, Any]], results: List[ToolResult]
+    ) -> str:
         ok = all(r.ok for r in results) if results else True
         tips = []
-        if not ok: tips.append("Some actions failed; consider allowlists/timeouts.")
-        if any(a['tool']=="files" for a in actions): tips.append("Files are sandboxed to 'files.root'.")
-        if any(a['tool']=="shell" for a in actions): tips.append("Shell obeys allow/deny lists.")
-        return f"Run {len(actions)} actions | All OK: {ok} | " + ("; ".join(tips) or "Indexed outputs to long‑term memory.")
+        if not ok:
+            tips.append("Some actions failed; consider allowlists/timeouts.")
+        if any(a["tool"] == "files" for a in actions):
+            tips.append("Files are sandboxed to 'files.root'.")
+        if any(a["tool"] == "shell" for a in actions):
+            tips.append("Shell obeys allow/deny lists.")
+        return f"Run {len(actions)} actions | All OK: {ok} | " + (
+            "; ".join(tips) or "Indexed outputs to long‑term memory."
+        )
 
     # -------- Memory writes --------
-    def _write_short(self, goal: str, plan_lines: List[str], outcome: str, reflection: str) -> STEntry:
+    def _write_short(
+        self, goal: str, plan_lines: List[str], outcome: str, reflection: str
+    ) -> STEntry:
         eid = uuid.uuid4().hex[:12]
         entry = STEntry(eid, now_iso(), goal, plan_lines, outcome, reflection)
         self.st.append(entry)
         return entry
 
     def _write_long(self, entry: STEntry, tool_logs: List[Dict[str, Any]]):
-        if not self.lt: return
-        self.lt.upsert(id=f"{entry.id}:goal", timestamp=entry.timestamp, kind="goal", ref_id=entry.id, content=entry.goal, extra={})
-        self.lt.upsert(id=f"{entry.id}:plan", timestamp=entry.timestamp, kind="plan", ref_id=entry.id, content="\n".join(entry.plan), extra={})
-        self.lt.upsert(id=f"{entry.id}:outcome", timestamp=entry.timestamp, kind="outcome", ref_id=entry.id, content=entry.outcome, extra={})
-        self.lt.upsert(id=f"{entry.id}:reflection", timestamp=entry.timestamp, kind="reflection", ref_id=entry.id, content=entry.reflection, extra={})
+        if not self.lt:
+            return
+        self.lt.upsert(
+            id=f"{entry.id}:goal",
+            timestamp=entry.timestamp,
+            kind="goal",
+            ref_id=entry.id,
+            content=entry.goal,
+            extra={},
+        )
+        self.lt.upsert(
+            id=f"{entry.id}:plan",
+            timestamp=entry.timestamp,
+            kind="plan",
+            ref_id=entry.id,
+            content="\n".join(entry.plan),
+            extra={},
+        )
+        self.lt.upsert(
+            id=f"{entry.id}:outcome",
+            timestamp=entry.timestamp,
+            kind="outcome",
+            ref_id=entry.id,
+            content=entry.outcome,
+            extra={},
+        )
+        self.lt.upsert(
+            id=f"{entry.id}:reflection",
+            timestamp=entry.timestamp,
+            kind="reflection",
+            ref_id=entry.id,
+            content=entry.reflection,
+            extra={},
+        )
         for i, log in enumerate(tool_logs, 1):
             body = f"[{log['tool']}] ok={log['ok']} meta={json.dumps(log.get('meta', {}))}\n{log['output']}"
             # compress large bodies for audit storage readability
             if len(body) > 5000:
-                buf = io.BytesIO();
-                with gzip.GzipFile(fileobj=buf, mode='w') as gz: gz.write(body.encode('utf-8'))
+                buf = io.BytesIO()
+                with gzip.GzipFile(fileobj=buf, mode="w") as gz:
+                    gz.write(body.encode("utf-8"))
                 body = f"<gzipped:{len(buf.getvalue())}B>"
-            self.lt.upsert(id=f"{entry.id}:tool:{i}", timestamp=entry.timestamp, kind="tool", ref_id=entry.id, content=body, extra={})
+            self.lt.upsert(
+                id=f"{entry.id}:tool:{i}",
+                timestamp=entry.timestamp,
+                kind="tool",
+                ref_id=entry.id,
+                content=body,
+                extra={},
+            )
 
     # -------- Commands --------
     def cmd_help(self):
@@ -542,9 +747,13 @@ class Francis:
         print("Commands:")
         print("  help                           Show this help")
         print("  mem [N]                        Show recent short‑term entries")
-        print("  review <fts query> [kinds]     Search long‑term (kinds: goal,plan,outcome,reflection,tool)")
+        print(
+            "  review <fts query> [kinds]     Search long‑term (kinds: goal,plan,outcome,reflection,tool)"
+        )
         print("  export                         Export JSON and SQLite backups")
-        print("  prune <days>                   Prune short‑term entries older than N days")
+        print(
+            "  prune <days>                   Prune short‑term entries older than N days"
+        )
         print("  tools                          List registered tools")
         print("  set dry_run on|off             Toggle dry‑run mode")
         print("  profile on|off                 Toggle profiling of last goal")
@@ -558,7 +767,8 @@ class Francis:
         n = n or int(self.cfg.data["memory"]["review_window"])
         items = self.st.dump()[-n:]
         if not items:
-            print("(no memory yet)"); return
+            print("(no memory yet)")
+            return
         print(hrule())
         for it in items:
             print(f"[{it['timestamp']}] id={it['id']}")
@@ -571,15 +781,18 @@ class Francis:
 
     def cmd_review(self, raw: str):
         if not self.lt:
-            print("Long‑term memory disabled."); return
+            print("Long‑term memory disabled.")
+            return
         parts = raw.split()
         query = parts[1] if len(parts) >= 2 else ""
         kinds = parts[2].split(",") if len(parts) >= 3 else None
         if not query:
-            print("Usage: review <fts query> [kinds]"); return
+            print("Usage: review <fts query> [kinds]")
+            return
         rows = self.lt.search(query, kinds=kinds)
         if not rows:
-            print("(no results)"); return
+            print("(no results)")
+            return
         print(hrule("="))
         print(f"Search: {query} kinds={kinds or 'all'}")
         for r in rows:
@@ -602,9 +815,13 @@ class Francis:
     def cmd_prune(self, days: int):
         cutoff = dt.datetime.now() - dt.timedelta(days=days)
         before = len(self.st.data)
+
         def ts(e):
-            try: return dt.datetime.fromisoformat(e.get("timestamp", ""))
-            except Exception: return dt.datetime.min
+            try:
+                return dt.datetime.fromisoformat(e.get("timestamp", ""))
+            except Exception:
+                return dt.datetime.min
+
         self.st.data = [e for e in self.st.data if ts(e) >= cutoff]
         self.st._save()
         print(f"Pruned {before - len(self.st.data)} entries.")
@@ -613,7 +830,9 @@ class Francis:
         print(hrule())
         print("Status")
         print(f"  App: {self.app_name}")
-        print(f"  Dry run: {self.cfg.data['app']['dry_run']}  Profile: {self.cfg.data['app']['profile']}")
+        print(
+            f"  Dry run: {self.cfg.data['app']['dry_run']}  Profile: {self.cfg.data['app']['profile']}"
+        )
         print(f"  Tools: {', '.join(self.tools.names())}")
         print(f"  Memory JSON: {'exists' if MEMORY_JSON.exists() else 'missing'}")
         print(f"  SQLite DB: {'exists' if DB_PATH.exists() else 'missing'}")
@@ -622,8 +841,10 @@ class Francis:
 
     def cmd_health(self):
         issues = []
-        if not os.access(APP_DIR, os.W_OK): issues.append("App dir not writable")
-        if not os.access(EXPORT_DIR, os.W_OK): issues.append("Export dir not writable")
+        if not os.access(APP_DIR, os.W_OK):
+            issues.append("App dir not writable")
+        if not os.access(EXPORT_DIR, os.W_OK):
+            issues.append("Export dir not writable")
         if issues:
             print("Health: FAIL\n - " + "\n - ".join(issues))
         else:
@@ -644,9 +865,12 @@ class Francis:
     def execute_goal(self, goal: str):
         start = time.perf_counter()
         actions = self.plan(goal)
-        plan_lines = [f"{i+1}. {a['explain']} → {a['tool']}" for i, a in enumerate(actions)]
+        plan_lines = [
+            f"{i+1}. {a['explain']} → {a['tool']}" for i, a in enumerate(actions)
+        ]
         print("Plan:")
-        for ln in plan_lines: print("  "+ln)
+        for ln in plan_lines:
+            print("  " + ln)
         results: List[ToolResult] = []
         tool_logs: List[Dict[str, Any]] = []
         for a in actions:
@@ -658,19 +882,40 @@ class Francis:
                     tool = self.tools.get(a["tool"])  # may raise
                     res = tool.run(**a.get("args", {}))
                 except Exception as e:
-                    res = ToolResult(False, f"{type(e).__name__}: {e}", {"trace": traceback.format_exc()[-500:]})
+                    res = ToolResult(
+                        False,
+                        f"{type(e).__name__}: {e}",
+                        {"trace": traceback.format_exc()[-500:]},
+                    )
             results.append(res)
-            tool_logs.append({"tool": a["tool"], "ok": res.ok, "output": res.output, "meta": res.meta})
-            preview = res.output[:600] + ("\n… [truncated]" if len(res.output) > 600 else "")
-            print(hrule()); print(f"[{a['tool']}] ok={res.ok} meta={res.meta}")
+            tool_logs.append(
+                {
+                    "tool": a["tool"],
+                    "ok": res.ok,
+                    "output": res.output,
+                    "meta": res.meta,
+                }
+            )
+            preview = res.output[:600] + (
+                "\n… [truncated]" if len(res.output) > 600 else ""
+            )
+            print(hrule())
+            print(f"[{a['tool']}] ok={res.ok} meta={res.meta}")
             print(preview)
             log_audit("tool_call", {"tool": a["tool"], "ok": res.ok, "meta": res.meta})
         reflection = self.reflect(goal, actions, results)
-        outcome = "; ".join([f"{i+1}:{'OK' if r.ok else 'ERR'}" for i, r in enumerate(results)]) or "no actions"
+        outcome = (
+            "; ".join(
+                [f"{i+1}:{'OK' if r.ok else 'ERR'}" for i, r in enumerate(results)]
+            )
+            or "no actions"
+        )
         entry = self._write_short(goal, plan_lines, outcome, reflection)
         self._write_long(entry, tool_logs)
         dur = time.perf_counter() - start
-        print(hrule()); print("Reflection:"); print("  "+reflection)
+        print(hrule())
+        print("Reflection:")
+        print("  " + reflection)
         print(f"Duration: {dur:.2f}s")
         if self.cfg.data["app"].get("profile"):
             log_console("(profiling) — lightweight timing enabled for last run.")
@@ -679,23 +924,58 @@ class Francis:
     def run(self):
         try:
             while True:
-                raw = input("\nEnter a goal (or 'help','mem','review','export','prune','tools','set dry_run on|off','profile on|off','status','health','selftest','exit'): ").strip()
-                if not raw: continue
+                raw = input(
+                    "\nEnter a goal (or 'help','mem','review','export','prune','tools','set dry_run on|off','profile on|off','status','health','selftest','exit'): "
+                ).strip()
+                if not raw:
+                    continue
                 low = raw.lower()
-                if low == "exit": print("Goodbye!"); break
-                if low == "help": self.cmd_help(); continue
-                if low.startswith("mem"): parts = raw.split(); n = int(parts[1]) if len(parts)>1 and parts[1].isdigit() else None; self.cmd_mem(n); continue
-                if low.startswith("review"): self.cmd_review(raw); continue
-                if low == "export": self.cmd_export(); continue
-                if low.startswith("prune"): parts = raw.split(); days = int(parts[1]) if len(parts)==2 and parts[1].isdigit() else 30; self.cmd_prune(days); continue
-                if low == "tools": print(", ".join(self.tools.names())); continue
+                if low == "exit":
+                    print("Goodbye!")
+                    break
+                if low == "help":
+                    self.cmd_help()
+                    continue
+                if low.startswith("mem"):
+                    parts = raw.split()
+                    n = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else None
+                    self.cmd_mem(n)
+                    continue
+                if low.startswith("review"):
+                    self.cmd_review(raw)
+                    continue
+                if low == "export":
+                    self.cmd_export()
+                    continue
+                if low.startswith("prune"):
+                    parts = raw.split()
+                    days = (
+                        int(parts[1]) if len(parts) == 2 and parts[1].isdigit() else 30
+                    )
+                    self.cmd_prune(days)
+                    continue
+                if low == "tools":
+                    print(", ".join(self.tools.names()))
+                    continue
                 if low.startswith("set dry_run"):
-                    val = raw.rsplit(" ",1)[-1].lower() in ("on","true","1","yes"); self.cfg.data["app"]["dry_run"] = val; print(f"dry_run = {val}"); continue
+                    val = raw.rsplit(" ", 1)[-1].lower() in ("on", "true", "1", "yes")
+                    self.cfg.data["app"]["dry_run"] = val
+                    print(f"dry_run = {val}")
+                    continue
                 if low.startswith("profile"):
-                    val = raw.rsplit(" ",1)[-1].lower() in ("on","true","1","yes"); self.cfg.data["app"]["profile"] = val; print(f"profile = {val}"); continue
-                if low == "status": self.cmd_status(); continue
-                if low == "health": self.cmd_health(); continue
-                if low == "selftest": self.cmd_selftest(); continue
+                    val = raw.rsplit(" ", 1)[-1].lower() in ("on", "true", "1", "yes")
+                    self.cfg.data["app"]["profile"] = val
+                    print(f"profile = {val}")
+                    continue
+                if low == "status":
+                    self.cmd_status()
+                    continue
+                if low == "health":
+                    self.cmd_health()
+                    continue
+                if low == "selftest":
+                    self.cmd_selftest()
+                    continue
                 # Otherwise it's a goal
                 self.execute_goal(raw)
         except KeyboardInterrupt:

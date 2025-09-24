@@ -42,34 +42,70 @@ except Exception:
 
 # ---------- Paths ----------
 APP_DIR = Path(__file__).resolve().parent
-LOG_DIR = APP_DIR / "logs"; LOG_DIR.mkdir(exist_ok=True)
-EXPORT_DIR = APP_DIR / "exports"; EXPORT_DIR.mkdir(exist_ok=True)
-TOOLS_DIR = APP_DIR / "tools"; TOOLS_DIR.mkdir(exist_ok=True)
+LOG_DIR = APP_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+EXPORT_DIR = APP_DIR / "exports"
+EXPORT_DIR.mkdir(exist_ok=True)
+TOOLS_DIR = APP_DIR / "tools"
+TOOLS_DIR.mkdir(exist_ok=True)
 MEMORY_JSON = APP_DIR / "memory.json"
 DB_PATH = APP_DIR / "francis.sqlite"
 AUDIT_PATH = LOG_DIR / f"audit-{dt.datetime.now().strftime('%Y%m%d')}.jsonl"
 
 DEFAULT_CFG = {
-    "app": {"name": "Francis", "max_short_term": 800, "dry_run": False, "profile": False},
+    "app": {
+        "name": "Francis",
+        "max_short_term": 800,
+        "dry_run": False,
+        "profile": False,
+    },
     "memory": {"enable_long_term": True, "review_window": 15},
     "policy": {
         # raw strings to avoid \s warnings
         "redact_patterns": [
             r"(?i)(api[_-]?key|token|password)\s*[:=]\s*([A-Za-z0-9\-_.]+)",
-            r"(?i)secret\s*[:=]\s*([^\s]+)"
+            r"(?i)secret\s*[:=]\s*([^\s]+)",
         ],
         "max_output_chars": 16000,
     },
     "shell": {
         "timeout_sec": 25,
         "cwd": str(APP_DIR),  # override in config.toml
-        "allow": ["echo", "dir", "ls", "type", "cat", "python", "pip", "git", "ipconfig", "whoami"],
-        "deny": ["rm", "del", "rmdir", "format", "shutdown", "mkfs", "reg ", "sc ", "bcdedit"],
+        "allow": [
+            "echo",
+            "dir",
+            "ls",
+            "type",
+            "cat",
+            "python",
+            "pip",
+            "git",
+            "ipconfig",
+            "whoami",
+        ],
+        "deny": [
+            "rm",
+            "del",
+            "rmdir",
+            "format",
+            "shutdown",
+            "mkfs",
+            "reg ",
+            "sc ",
+            "bcdedit",
+        ],
         "env_allow": ["PATH", "PYTHONPATH"],
     },
     "files": {"root": str(APP_DIR), "allow_write": True},
-    "web": {"timeout_sec": 18, "user_agent": "FrancisBot/1.0 (+local)", "max_bytes": 900_000, "retries": 2, "backoff": 0.6},
+    "web": {
+        "timeout_sec": 18,
+        "user_agent": "FrancisBot/1.0 (+local)",
+        "max_bytes": 900_000,
+        "retries": 2,
+        "backoff": 0.6,
+    },
 }
+
 
 # ---------- Config ----------
 class Config:
@@ -102,7 +138,7 @@ class Config:
         for k, v in os.environ.items():
             if not k.startswith("FRANCIS_"):
                 continue
-            path = k[len("FRANCIS_"):].lower().split("__")
+            path = k[len("FRANCIS_") :].lower().split("__")
             try:
                 ref = self._cfg
                 for p in path[:-1]:
@@ -120,12 +156,18 @@ class Config:
         assert isinstance(self._cfg["app"]["dry_run"], bool)
         assert 1 <= int(self._cfg["app"]["max_short_term"]) <= 5000
 
+
 # ---------- Logging ----------
 def log_console(msg: str):
     print(msg)
 
+
 def log_audit(event: str, payload: dict):
-    rec = {"ts": dt.datetime.now().isoformat(timespec="seconds"), "event": event, **payload}
+    rec = {
+        "ts": dt.datetime.now().isoformat(timespec="seconds"),
+        "event": event,
+        **payload,
+    }
     with AUDIT_PATH.open("a", encoding="utf-8") as f:
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
     # rotate old audit logs (keep 10)
@@ -137,6 +179,7 @@ def log_audit(event: str, payload: dict):
         except Exception:
             pass
 
+
 # ---------- Memory ----------
 @dataclass
 class STEntry:
@@ -146,6 +189,7 @@ class STEntry:
     plan: List[str]
     outcome: str
     reflection: str
+
 
 class ShortTermMemory:
     def __init__(self, path: Path, max_items: int):
@@ -164,7 +208,7 @@ class ShortTermMemory:
 
     def _save(self):
         if len(self.data) > self.max_items:
-            self.data = self.data[-self.max_items:]
+            self.data = self.data[-self.max_items :]
         self.path.write_text(json.dumps(self.data, indent=2))
 
     def append(self, entry: STEntry):
@@ -173,6 +217,7 @@ class ShortTermMemory:
 
     def dump(self) -> List[Dict[str, Any]]:
         return list(self.data)
+
 
 class LongTermMemory:
     def __init__(self, db_path: Path):
@@ -202,16 +247,35 @@ class LongTermMemory:
         )
         self.conn.commit()
 
-    def upsert(self, *, id: str, timestamp: str, kind: str, ref_id: str, content: str, extra: dict | None = None):
+    def upsert(
+        self,
+        *,
+        id: str,
+        timestamp: str,
+        kind: str,
+        ref_id: str,
+        content: str,
+        extra: dict | None = None,
+    ):
         cur = self.conn.cursor()
         cur.execute(
             "INSERT OR REPLACE INTO entries (id, timestamp, kind, ref_id, extra) VALUES (?,?,?,?,?)",
             (id, timestamp, kind, ref_id, json.dumps(extra or {})),
         )
-        cur.execute("INSERT OR REPLACE INTO entries_fts (id, content) VALUES (?,?)", (id, content))
+        cur.execute(
+            "INSERT OR REPLACE INTO entries_fts (id, content) VALUES (?,?)",
+            (id, content),
+        )
         self.conn.commit()
 
-    def search(self, query: str, *, limit: int = 20, kinds: Optional[List[str]] = None, since: Optional[str] = None) -> List[Dict[str, Any]]:
+    def search(
+        self,
+        query: str,
+        *,
+        limit: int = 20,
+        kinds: Optional[List[str]] = None,
+        since: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
         cur = self.conn.cursor()
         q = query.replace('"', '""')
         sql = """
@@ -232,12 +296,22 @@ class LongTermMemory:
         params.append(limit)
         cur.execute(sql, params)
         rows = cur.fetchall()
-        return [{"id": r[0], "timestamp": r[1], "kind": r[2], "ref_id": r[3], "snippet": r[4]} for r in rows]
+        return [
+            {
+                "id": r[0],
+                "timestamp": r[1],
+                "kind": r[2],
+                "ref_id": r[3],
+                "snippet": r[4],
+            }
+            for r in rows
+        ]
 
     def backup(self, dest: Path):
         self.conn.commit()
         with sqlite3.connect(f"file:{dest}?mode=rwc", uri=True) as target:
             self.conn.backup(target)
+
 
 # ---------- Tools ----------
 @dataclass
@@ -245,6 +319,7 @@ class ToolResult:
     ok: bool
     output: str
     meta: Dict[str, Any]
+
 
 class Tool:
     name: str = "tool"
@@ -257,7 +332,11 @@ class Tool:
         return ToolResult(False, "unimplemented", {})
 
     def _truncate(self, s: str, max_chars: int) -> Tuple[str, bool]:
-        return (s, False) if len(s) <= max_chars else (s[:max_chars] + "\n… [truncated]", True)
+        return (
+            (s, False)
+            if len(s) <= max_chars
+            else (s[:max_chars] + "\n… [truncated]", True)
+        )
 
     def _redact(self, s: str, patterns: List[str]) -> str:
         for pat in patterns:
@@ -266,6 +345,7 @@ class Tool:
             except re.error:
                 pass
         return s
+
 
 class ShellTool(Tool):
     name = "shell"
@@ -279,17 +359,35 @@ class ShellTool(Tool):
         cwd = Path(shcfg["cwd"]).resolve()
         base = Path(shlex.split(cmd, posix=False)[0]).name.lower() if cmd else ""
         if base in deny or (allow and base not in allow):
-            return ToolResult(False, f"Command '{base}' not allowed by policy.", {"cmd": cmd})
+            return ToolResult(
+                False, f"Command '{base}' not allowed by policy.", {"cmd": cmd}
+            )
         try:
-            proc = subprocess.run(cmd, shell=True, cwd=str(cwd), capture_output=True, text=True, timeout=timeout)
+            proc = subprocess.run(
+                cmd,
+                shell=True,
+                cwd=str(cwd),
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+            )
             out = (proc.stdout or "") + (proc.stderr or "")
             out = self._redact(out, policy["redact_patterns"])
             out, truncated = self._truncate(out, policy["max_output_chars"])
-            return ToolResult(proc.returncode == 0, out.strip(), {"returncode": proc.returncode, "cwd": str(cwd), "truncated": truncated})
+            return ToolResult(
+                proc.returncode == 0,
+                out.strip(),
+                {
+                    "returncode": proc.returncode,
+                    "cwd": str(cwd),
+                    "truncated": truncated,
+                },
+            )
         except subprocess.TimeoutExpired:
             return ToolResult(False, f"Timed out after {timeout}s", {"cmd": cmd})
         except Exception as e:
             return ToolResult(False, str(e), {"cmd": cmd})
+
 
 class FileTool(Tool):
     name = "files"
@@ -308,17 +406,24 @@ class FileTool(Tool):
             if op == "read":
                 data = p.read_text(encoding="utf-8")
                 data = self._redact(data, CFG.data["policy"]["redact_patterns"])
-                data, truncated = self._truncate(data, CFG.data["policy"]["max_output_chars"])
+                data, truncated = self._truncate(
+                    data, CFG.data["policy"]["max_output_chars"]
+                )
                 return ToolResult(True, data, {"path": str(p), "truncated": truncated})
             if op == "write":
                 if not CFG.data["files"]["allow_write"]:
-                    return ToolResult(False, "Writes disabled by policy.", {"path": str(p)})
+                    return ToolResult(
+                        False, "Writes disabled by policy.", {"path": str(p)}
+                    )
                 p.parent.mkdir(parents=True, exist_ok=True)
                 p.write_text(content or "", encoding="utf-8")
-                return ToolResult(True, f"Wrote {p}", {"bytes": len((content or '').encode('utf-8'))})
+                return ToolResult(
+                    True, f"Wrote {p}", {"bytes": len((content or "").encode("utf-8"))}
+                )
             return ToolResult(False, "Unsupported op (read|write)", {"op": op})
         except Exception as e:
             return ToolResult(False, str(e), {"op": op, "path": path})
+
 
 class WebTool(Tool):
     name = "web"
@@ -335,12 +440,15 @@ class WebTool(Tool):
         for attempt in range(retries + 1):
             try:
                 if requests:
-                    resp = requests.get(url, timeout=timeout, headers={"User-Agent": ua}, stream=True)
+                    resp = requests.get(
+                        url, timeout=timeout, headers={"User-Agent": ua}, stream=True
+                    )
                     resp.raise_for_status()
                     data = resp.raw.read(max_bytes, decode_content=True)
                     text = data.decode(resp.encoding or "utf-8", errors="ignore")
                 else:
                     from urllib.request import Request, urlopen
+
                     req = Request(url, headers={"User-Agent": ua})
                     with urlopen(req, timeout=timeout) as r:  # type: ignore
                         text = r.read(max_bytes).decode("utf-8", errors="ignore")
@@ -348,13 +456,16 @@ class WebTool(Tool):
                 text = re.sub(r"<style[\s\S]*?</style>", "", text, flags=re.I)
                 text = re.sub(r"<[^>]+>", " ", text)
                 text = re.sub(r"\s+", " ", text).strip()
-                text, truncated = self._truncate(text, CFG.data["policy"]["max_output_chars"])
+                text, truncated = self._truncate(
+                    text, CFG.data["policy"]["max_output_chars"]
+                )
                 return ToolResult(True, text, {"truncated": truncated})
             except Exception as e:
                 err = str(e)
                 if attempt < retries:
-                    time.sleep(backoff * (2 ** attempt))
+                    time.sleep(backoff * (2**attempt))
         return ToolResult(False, err or "unknown error", {"url": url})
+
 
 class ToolRegistry:
     def __init__(self):
@@ -380,30 +491,41 @@ class ToolRegistry:
             try:
                 spec.loader.exec_module(mod)  # type: ignore
                 for obj in vars(mod).values():
-                    if isinstance(obj, type) and issubclass(obj, Tool) and obj is not Tool:
+                    if (
+                        isinstance(obj, type)
+                        and issubclass(obj, Tool)
+                        and obj is not Tool
+                    ):
                         self.register(obj(CFG.data))
             except Exception as e:
                 log_console(f"[warn] Failed to load plugin {path.name}: {e}")
+
 
 # ---------- Francis Core ----------
 def now_iso() -> str:
     return dt.datetime.now().isoformat(timespec="seconds")
 
+
 def hrule(ch: str = "-") -> str:
     return ch * 70
+
 
 class Francis:
     def __init__(self, cfg: Config):
         self.cfg = cfg
         self.app_name = cfg.data["app"]["name"]
         self.st = ShortTermMemory(MEMORY_JSON, cfg.data["app"]["max_short_term"])
-        self.lt = LongTermMemory(DB_PATH) if cfg.data["memory"]["enable_long_term"] else None
+        self.lt = (
+            LongTermMemory(DB_PATH) if cfg.data["memory"]["enable_long_term"] else None
+        )
         self.tools = ToolRegistry()
         self.tools.register(ShellTool(cfg.data))
         self.tools.register(FileTool(cfg.data))
         self.tools.register(WebTool(cfg.data))
         self.tools.load_plugins()
-        log_console(f"[{now_iso()}] {self.app_name} ready. Tools: {', '.join(self.tools.names())}")
+        log_console(
+            f"[{now_iso()}] {self.app_name} ready. Tools: {', '.join(self.tools.names())}"
+        )
         log_audit("startup", {"tools": self.tools.names()})
 
     # ---- Planner helpers ----
@@ -438,24 +560,62 @@ class Francis:
                 actions.append(parsed)
                 continue
             pl = p.lower()
-            if pl.startswith("open ") and (pl.endswith(".txt") or pl.endswith(".md") or pl.endswith(".py")):
+            if pl.startswith("open ") and (
+                pl.endswith(".txt") or pl.endswith(".md") or pl.endswith(".py")
+            ):
                 path = p.split(" ", 1)[1]
-                actions.append({"tool": "files", "args": {"op": "read", "path": path}, "explain": f"Read file: {path}"})
+                actions.append(
+                    {
+                        "tool": "files",
+                        "args": {"op": "read", "path": path},
+                        "explain": f"Read file: {path}",
+                    }
+                )
             elif pl.startswith("write ") and ":" in p:
                 _, rest = p.split(" ", 1)
                 path, content = rest.split(":", 1)
-                actions.append({"tool": "files", "args": {"op": "write", "path": path.strip(), "content": content}, "explain": f"Write file: {path.strip()}"})
+                actions.append(
+                    {
+                        "tool": "files",
+                        "args": {
+                            "op": "write",
+                            "path": path.strip(),
+                            "content": content,
+                        },
+                        "explain": f"Write file: {path.strip()}",
+                    }
+                )
             elif pl.startswith("run "):
                 cmd = p.split(" ", 1)[1]
-                actions.append({"tool": "shell", "args": {"cmd": cmd}, "explain": f"Shell: {cmd}"})
+                actions.append(
+                    {"tool": "shell", "args": {"cmd": cmd}, "explain": f"Shell: {cmd}"}
+                )
             elif pl.startswith("fetch ") and p.split(" ", 1)[1].startswith("http"):
                 url = p.split(" ", 1)[1].strip()
-                actions.append({"tool": "web", "args": {"url": url}, "explain": f"Fetch URL: {url}"})
+                actions.append(
+                    {
+                        "tool": "web",
+                        "args": {"url": url},
+                        "explain": f"Fetch URL: {url}",
+                    }
+                )
             else:
                 if any(k in pl for k in ("git ", "python ", "pip ")):
-                    actions.append({"tool": "shell", "args": {"cmd": p}, "explain": f"Shell (keyword): {p}"})
+                    actions.append(
+                        {
+                            "tool": "shell",
+                            "args": {"cmd": p},
+                            "explain": f"Shell (keyword): {p}",
+                        }
+                    )
                 else:
-                    actions.append({"tool": "shell", "args": {"cmd": f"echo {shlex.quote(p)}"}, "explain": "Echo for traceability"})
+                    actions.append(
+                        {
+                            "tool": "shell",
+                            "args": {"cmd": f"echo {shlex.quote(p)}"},
+                            "explain": "Echo for traceability",
+                        }
+                    )
         return actions
 
     # ---- Risk & confirm ----
@@ -465,7 +625,20 @@ class Francis:
         score, reason = 1, "low"
         if t == "shell":
             cmd = a.get("cmd", "").lower()
-            if any(d in cmd for d in ["rm", "del", "rmdir", "format", "shutdown", "mkfs", "reg ", "sc ", "bcdedit"]):
+            if any(
+                d in cmd
+                for d in [
+                    "rm",
+                    "del",
+                    "rmdir",
+                    "format",
+                    "shutdown",
+                    "mkfs",
+                    "reg ",
+                    "sc ",
+                    "bcdedit",
+                ]
+            ):
                 return 9, "dangerous shell verb"
             if "git " in cmd:
                 score, reason = 5, "git side-effects"
@@ -477,7 +650,9 @@ class Francis:
 
     def confirm(self, action: Dict[str, Any], score: int, reason: str) -> bool:
         if self.cfg.data["app"]["dry_run"]:
-            log_console(f"[dry-run] {action['tool']} {action['args']} (risk={score}:{reason})")
+            log_console(
+                f"[dry-run] {action['tool']} {action['args']} (risk={score}:{reason})"
+            )
             return False
         if score >= 5:
             print(hrule())
@@ -488,7 +663,9 @@ class Francis:
         return True
 
     # ---- Reflection ----
-    def reflect(self, goal: str, actions: List[Dict[str, Any]], results: List[ToolResult]) -> str:
+    def reflect(
+        self, goal: str, actions: List[Dict[str, Any]], results: List[ToolResult]
+    ) -> str:
         ok = all(r.ok for r in results) if results else True
         tips = []
         if not ok:
@@ -497,10 +674,14 @@ class Francis:
             tips.append("Files are sandboxed to 'files.root'.")
         if any(a["tool"] == "shell" for a in actions):
             tips.append("Shell obeys allow/deny lists.")
-        return f"Run {len(actions)} actions | All OK: {ok} | " + ("; ".join(tips) or "Indexed outputs to long-term memory.")
+        return f"Run {len(actions)} actions | All OK: {ok} | " + (
+            "; ".join(tips) or "Indexed outputs to long-term memory."
+        )
 
     # ---- Memory writes ----
-    def _write_short(self, goal: str, plan_lines: List[str], outcome: str, reflection: str) -> STEntry:
+    def _write_short(
+        self, goal: str, plan_lines: List[str], outcome: str, reflection: str
+    ) -> STEntry:
         eid = uuid.uuid4().hex[:12]
         entry = STEntry(eid, now_iso(), goal, plan_lines, outcome, reflection)
         self.st.append(entry)
@@ -509,10 +690,38 @@ class Francis:
     def _write_long(self, entry: STEntry, tool_logs: List[Dict[str, Any]]):
         if not self.lt:
             return
-        self.lt.upsert(id=f"{entry.id}:goal", timestamp=entry.timestamp, kind="goal", ref_id=entry.id, content=entry.goal, extra={})
-        self.lt.upsert(id=f"{entry.id}:plan", timestamp=entry.timestamp, kind="plan", ref_id=entry.id, content="\n".join(entry.plan), extra={})
-        self.lt.upsert(id=f"{entry.id}:outcome", timestamp=entry.timestamp, kind="outcome", ref_id=entry.id, content=entry.outcome, extra={})
-        self.lt.upsert(id=f"{entry.id}:reflection", timestamp=entry.timestamp, kind="reflection", ref_id=entry.id, content=entry.reflection, extra={})
+        self.lt.upsert(
+            id=f"{entry.id}:goal",
+            timestamp=entry.timestamp,
+            kind="goal",
+            ref_id=entry.id,
+            content=entry.goal,
+            extra={},
+        )
+        self.lt.upsert(
+            id=f"{entry.id}:plan",
+            timestamp=entry.timestamp,
+            kind="plan",
+            ref_id=entry.id,
+            content="\n".join(entry.plan),
+            extra={},
+        )
+        self.lt.upsert(
+            id=f"{entry.id}:outcome",
+            timestamp=entry.timestamp,
+            kind="outcome",
+            ref_id=entry.id,
+            content=entry.outcome,
+            extra={},
+        )
+        self.lt.upsert(
+            id=f"{entry.id}:reflection",
+            timestamp=entry.timestamp,
+            kind="reflection",
+            ref_id=entry.id,
+            content=entry.reflection,
+            extra={},
+        )
         for i, log in enumerate(tool_logs, 1):
             body = f"[{log['tool']}] ok={log['ok']} meta={json.dumps(log.get('meta', {}))}\n{log['output']}"
             if len(body) > 5000:
@@ -520,14 +729,24 @@ class Francis:
                 with gzip.GzipFile(fileobj=buf, mode="w") as gz:
                     gz.write(body.encode("utf-8"))
                 body = f"<gzipped:{len(buf.getvalue())}B>"
-            self.lt.upsert(id=f"{entry.id}:tool:{i}", timestamp=entry.timestamp, kind="tool", ref_id=entry.id, content=body, extra={})
+            self.lt.upsert(
+                id=f"{entry.id}:tool:{i}",
+                timestamp=entry.timestamp,
+                kind="tool",
+                ref_id=entry.id,
+                content=body,
+                extra={},
+            )
 
     # ---- Task Graph runner ----
     _VAR_RX = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
 
     def _subst_vars(self, obj: Any, vars: Dict[str, Any]) -> Any:
         if isinstance(obj, str):
-            def repl(m): return str(vars.get(m.group(1), m.group(0)))
+
+            def repl(m):
+                return str(vars.get(m.group(1), m.group(0)))
+
             return self._VAR_RX.sub(repl, obj)
         if isinstance(obj, list):
             return [self._subst_vars(x, vars) for x in obj]
@@ -542,7 +761,10 @@ class Francis:
             print("TaskGraph: no steps provided.")
             return
 
-        plan_lines = [f"{i+1}. {step.get('use')} {json.dumps(step.get('args', {}))}" for i, step in enumerate(steps)]
+        plan_lines = [
+            f"{i+1}. {step.get('use')} {json.dumps(step.get('args', {}))}"
+            for i, step in enumerate(steps)
+        ]
         print("Plan (TaskGraph):")
         for ln in plan_lines:
             print("  " + ln)
@@ -557,7 +779,11 @@ class Francis:
                 results.append(ToolResult(False, "Missing 'use' in step", {}))
                 continue
             args = self._subst_vars(raw_args, vars)
-            action = {"tool": tool_name, "args": args, "explain": f"TaskGraph step {idx}"}
+            action = {
+                "tool": tool_name,
+                "args": args,
+                "explain": f"TaskGraph step {idx}",
+            }
             score, reason = self.risk_score(action)
             if not self.confirm(action, score, reason):
                 res = ToolResult(False, f"Skipped (risk={score})", {"action": action})
@@ -566,17 +792,43 @@ class Francis:
                     tool = self.tools.get(tool_name)
                     res = tool.run(**args)
                 except Exception as e:
-                    res = ToolResult(False, f"{type(e).__name__}: {e}", {"trace": traceback.format_exc()[-500:]})
+                    res = ToolResult(
+                        False,
+                        f"{type(e).__name__}: {e}",
+                        {"trace": traceback.format_exc()[-500:]},
+                    )
             results.append(res)
-            tool_logs.append({"tool": tool_name, "ok": res.ok, "output": res.output, "meta": res.meta})
-            preview = res.output[:600] + ("\n… [truncated]" if len(res.output) > 600 else "")
-            print(hrule()); print(f"[{tool_name}] ok={res.ok} meta={res.meta}"); print(preview)
+            tool_logs.append(
+                {
+                    "tool": tool_name,
+                    "ok": res.ok,
+                    "output": res.output,
+                    "meta": res.meta,
+                }
+            )
+            preview = res.output[:600] + (
+                "\n… [truncated]" if len(res.output) > 600 else ""
+            )
+            print(hrule())
+            print(f"[{tool_name}] ok={res.ok} meta={res.meta}")
+            print(preview)
 
-        reflection = self.reflect("TaskGraph", [{"tool": s.get("use",""), "args": s.get("args",{})} for s in steps], results)
-        outcome = "; ".join([f"{i+1}:{'OK' if r.ok else 'ERR'}" for i, r in enumerate(results)]) or "no actions"
+        reflection = self.reflect(
+            "TaskGraph",
+            [{"tool": s.get("use", ""), "args": s.get("args", {})} for s in steps],
+            results,
+        )
+        outcome = (
+            "; ".join(
+                [f"{i+1}:{'OK' if r.ok else 'ERR'}" for i, r in enumerate(results)]
+            )
+            or "no actions"
+        )
         entry = self._write_short("TaskGraph executed", plan_lines, outcome, reflection)
         self._write_long(entry, tool_logs)
-        print(hrule()); print("Reflection:"); print("  " + reflection)
+        print(hrule())
+        print("Reflection:")
+        print("  " + reflection)
 
     # ---- Commands ----
     def cmd_help(self):
@@ -584,16 +836,22 @@ class Francis:
         print("Commands:")
         print("  help                           Show this help")
         print("  mem [N]                        Show recent short-term entries")
-        print("  review <fts query> [kinds]     Search long-term (kinds: goal,plan,outcome,reflection,tool)")
+        print(
+            "  review <fts query> [kinds]     Search long-term (kinds: goal,plan,outcome,reflection,tool)"
+        )
         print("  export                         Export JSON and SQLite backups")
-        print("  prune <days>                   Prune short-term entries older than N days")
+        print(
+            "  prune <days>                   Prune short-term entries older than N days"
+        )
         print("  tools                          List registered tools")
         print("  set dry_run on|off             Toggle dry-run mode")
         print("  profile on|off                 Toggle profiling of last goal")
         print("  status                         Summarize current config and files")
         print("  health                         Quick health checks")
         print("  selftest                       Run a tiny end-to-end test")
-        print("  sampleplan                     Write _sample_plan.json in project root")
+        print(
+            "  sampleplan                     Write _sample_plan.json in project root"
+        )
         print("  runplan <path>                 Execute a JSON task graph file")
         print("  exit                           Quit")
         print(hrule())
@@ -650,11 +908,13 @@ class Francis:
     def cmd_prune(self, days: int):
         cutoff = dt.datetime.now() - dt.timedelta(days=days)
         before = len(self.st.data)
+
         def tsf(e):
             try:
                 return dt.datetime.fromisoformat(e.get("timestamp", ""))
             except Exception:
                 return dt.datetime.min
+
         self.st.data = [e for e in self.st.data if tsf(e) >= cutoff]
         self.st._save()
         print(f"Pruned {before - len(self.st.data)} entries.")
@@ -663,7 +923,9 @@ class Francis:
         print(hrule())
         print("Status")
         print(f"  App: {self.app_name}")
-        print(f"  Dry run: {self.cfg.data['app']['dry_run']}  Profile: {self.cfg.data['app']['profile']}")
+        print(
+            f"  Dry run: {self.cfg.data['app']['dry_run']}  Profile: {self.cfg.data['app']['profile']}"
+        )
         print(f"  Tools: {', '.join(self.tools.names())}")
         print(f"  Memory JSON: {'exists' if MEMORY_JSON.exists() else 'missing'}")
         print(f"  SQLite DB: {'exists' if DB_PATH.exists() else 'missing'}")
@@ -696,9 +958,16 @@ class Francis:
             "vars": {"msg": "world"},
             "steps": [
                 {"use": "shell", "args": {"cmd": "echo Hello ${msg}!"}},
-                {"use": "files", "args": {"op": "write", "path": "notes\\hello.txt", "content": "Hi ${msg}"}},
-                {"use": "web",   "args": {"url": "https://example.com"}}
-            ]
+                {
+                    "use": "files",
+                    "args": {
+                        "op": "write",
+                        "path": "notes\\hello.txt",
+                        "content": "Hi ${msg}",
+                    },
+                },
+                {"use": "web", "args": {"url": "https://example.com"}},
+            ],
         }
         dest = APP_DIR / "_sample_plan.json"
         dest.write_text(json.dumps(plan, indent=2))
@@ -708,7 +977,9 @@ class Francis:
     def execute_goal(self, goal: str):
         start = time.perf_counter()
         actions = self.plan(goal)
-        plan_lines = [f"{i+1}. {a['explain']} → {a['tool']}" for i, a in enumerate(actions)]
+        plan_lines = [
+            f"{i+1}. {a['explain']} → {a['tool']}" for i, a in enumerate(actions)
+        ]
         print("Plan:")
         for ln in plan_lines:
             print("  " + ln)
@@ -723,18 +994,41 @@ class Francis:
                     tool = self.tools.get(a["tool"])  # may raise
                     res = tool.run(**a.get("args", {}))
                 except Exception as e:
-                    res = ToolResult(False, f"{type(e).__name__}: {e}", {"trace": traceback.format_exc()[-500:]})
+                    res = ToolResult(
+                        False,
+                        f"{type(e).__name__}: {e}",
+                        {"trace": traceback.format_exc()[-500:]},
+                    )
             results.append(res)
-            tool_logs.append({"tool": a["tool"], "ok": res.ok, "output": res.output, "meta": res.meta})
-            preview = res.output[:600] + ("\n… [truncated]" if len(res.output) > 600 else "")
-            print(hrule()); print(f"[{a['tool']}] ok={res.ok} meta={res.meta}"); print(preview)
+            tool_logs.append(
+                {
+                    "tool": a["tool"],
+                    "ok": res.ok,
+                    "output": res.output,
+                    "meta": res.meta,
+                }
+            )
+            preview = res.output[:600] + (
+                "\n… [truncated]" if len(res.output) > 600 else ""
+            )
+            print(hrule())
+            print(f"[{a['tool']}] ok={res.ok} meta={res.meta}")
+            print(preview)
             log_audit("tool_call", {"tool": a["tool"], "ok": res.ok, "meta": res.meta})
         reflection = self.reflect(goal, actions, results)
-        outcome = "; ".join([f"{i+1}:{'OK' if r.ok else 'ERR'}" for i, r in enumerate(results)]) or "no actions"
+        outcome = (
+            "; ".join(
+                [f"{i+1}:{'OK' if r.ok else 'ERR'}" for i, r in enumerate(results)]
+            )
+            or "no actions"
+        )
         entry = self._write_short(goal, plan_lines, outcome, reflection)
         self._write_long(entry, tool_logs)
         dur = time.perf_counter() - start
-        print(hrule()); print("Reflection:"); print("  " + reflection); print(f"Duration: {dur:.2f}s")
+        print(hrule())
+        print("Reflection:")
+        print("  " + reflection)
+        print(f"Duration: {dur:.2f}s")
         if self.cfg.data["app"].get("profile"):
             log_console("(profiling) — lightweight timing enabled for last run.")
 
@@ -742,7 +1036,9 @@ class Francis:
     def run(self):
         try:
             while True:
-                raw = input("\nEnter a goal (or 'help','mem','review','export','prune','tools','set dry_run on|off','profile on|off','status','health','selftest','sampleplan','runplan <path>','exit'): ").strip()
+                raw = input(
+                    "\nEnter a goal (or 'help','mem','review','export','prune','tools','set dry_run on|off','profile on|off','status','health','selftest','sampleplan','runplan <path>','exit'): "
+                ).strip()
                 if not raw:
                     continue
                 low = raw.lower()
@@ -765,7 +1061,9 @@ class Francis:
                     continue
                 if low.startswith("prune"):
                     parts = raw.split()
-                    days = int(parts[1]) if len(parts) == 2 and parts[1].isdigit() else 30
+                    days = (
+                        int(parts[1]) if len(parts) == 2 and parts[1].isdigit() else 30
+                    )
                     self.cmd_prune(days)
                     continue
                 if low == "tools":
@@ -795,7 +1093,11 @@ class Francis:
                     continue
                 if low.startswith("runplan"):
                     _, _, path = raw.partition(" ")
-                    p = (APP_DIR / path) if path and not Path(path).is_absolute() else Path(path)
+                    p = (
+                        (APP_DIR / path)
+                        if path and not Path(path).is_absolute()
+                        else Path(path)
+                    )
                     if not path or not p.exists():
                         print("Usage: runplan <path-to-json>  (file must exist)")
                         continue
@@ -813,6 +1115,7 @@ class Francis:
             print(f"[error] {e}")
             traceback.print_exc()
             raise
+
 
 if __name__ == "__main__":
     CFG = Config(DEFAULT_CFG)

@@ -28,3 +28,6 @@ restore/
 backups/
 *.zip
 *.log
+
+# test outputs
+test-results.xml

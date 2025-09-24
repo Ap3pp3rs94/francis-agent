@@ -8,6 +8,7 @@ from typing import List, Optional
 REFLECTIONS_PATH = Path(r"C:\Francis\data\reflections.json")
 REFLECTIONS_PATH.parent.mkdir(parents=True, exist_ok=True)
 
+
 @dataclass
 class Reflection:
     timestamp: str
@@ -15,6 +16,7 @@ class Reflection:
     plan: str
     outcome: Optional[str]
     reflection: str
+
 
 class ReflectionMemory:
     def __init__(self, path: Path = REFLECTIONS_PATH, max_items: int = 24):
@@ -27,7 +29,7 @@ class ReflectionMemory:
         if self.path.exists():
             try:
                 data = json.loads(self.path.read_text(encoding="utf-8"))
-                self._cache = [Reflection(**item) for item in data][-self.max_items:]
+                self._cache = [Reflection(**item) for item in data][-self.max_items :]
             except Exception:
                 self._cache = []
         else:
@@ -35,11 +37,13 @@ class ReflectionMemory:
 
     def save(self):
         self.path.write_text(
-            json.dumps([asdict(r) for r in self._cache][-self.max_items:], indent=2),
+            json.dumps([asdict(r) for r in self._cache][-self.max_items :], indent=2),
             encoding="utf-8",
         )
 
-    def add(self, goal: str, plan: str, reflection_text: str, outcome: Optional[str] = None):
+    def add(
+        self, goal: str, plan: str, reflection_text: str, outcome: Optional[str] = None
+    ):
         self._cache.append(
             Reflection(
                 timestamp=datetime.utcnow().isoformat(timespec="seconds") + "Z",
@@ -69,4 +73,6 @@ class ReflectionMemory:
 
     def export(self, export_path: Path):
         export_path.parent.mkdir(parents=True, exist_ok=True)
-        export_path.write_text(json.dumps([asdict(r) for r in self._cache], indent=2), encoding="utf-8")
+        export_path.write_text(
+            json.dumps([asdict(r) for r in self._cache], indent=2), encoding="utf-8"
+        )
