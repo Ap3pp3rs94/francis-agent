@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "francis-agent"
+version = "1.0.2"
+description = "Local autonomy loop with tools"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Ap3pp3rs94" }]
+requires-python = ">=3.11"
+
+[project.urls]
+Homepage = "https://github.com/Ap3pp3rs94/francis-agent"
+
+# If francis.py exposes main(), keep this; otherwise delete the [project.scripts] block.
+[project.scripts]
+francis = "francis:main"
+
+[tool.setuptools]
+py-modules = ["francis"]
