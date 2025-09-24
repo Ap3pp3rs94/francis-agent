@@ -1,0 +1,13 @@
+# Build/output
+backups/
+restore/
+*.zip
+*.zip.sha256
+*.log
+
+# Agent exports
+*.sqlite
+memory_*.json
+
+# Test artifacts
+test-results.xml
