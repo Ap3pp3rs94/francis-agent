@@ -1,0 +1,34 @@
+[app]
+name = "Francis"
+max_short_term = 800
+dry_run = false
+profile = false
+
+[memory]
+enable_long_term = true
+review_window = 15
+
+[policy]
+max_output_chars = 16000
+redact_patterns = [
+  "(?i)(api[_-]?key|token|password)\\s*[:=]\\s*([A-Za-z0-9\\-_.]+)",
+  "(?i)secret\\s*[:=]\\s*([^\\s]+)"
+]
+
+[shell]
+timeout_sec = 25
+cwd = "C:\\Francis\\agent"
+allow = ["echo", "dir", "ls", "type", "cat", "python", "pip", "git", "ipconfig", "whoami"]
+deny = ["rm", "del", "rmdir", "format", "shutdown", "mkfs", "reg ", "sc ", "bcdedit"]
+env_allow = ["PATH", "PYTHONPATH"]
+
+[files]
+root = "C:\\Francis\\agent"
+allow_write = true
+
+[web]
+timeout_sec = 18
+user_agent = "FrancisBot/1.0 (+local)"
+max_bytes = 900000
+retries = 2
+backoff = 0.6

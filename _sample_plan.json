@@ -1,0 +1,27 @@
+{
+  "vars": {
+    "msg": "world"
+  },
+  "steps": [
+    {
+      "use": "shell",
+      "args": {
+        "cmd": "echo Hello ${msg}!"
+      }
+    },
+    {
+      "use": "files",
+      "args": {
+        "op": "write",
+        "path": "notes\\hello.txt",
+        "content": "Hi ${msg}"
+      }
+    },
+    {
+      "use": "web",
+      "args": {
+        "url": "https://example.com"
+      }
+    }
+  ]
+}

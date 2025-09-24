@@ -1,0 +1,229 @@
+{"ts": "2025-09-23T14:31:19", "event": "startup", "tools": ["files", "hello", "search", "shell", "web"]}
+{"ts": "2025-09-23T14:31:21", "event": "tool_call", "tool": "shell", "ok": true, "meta": {"returncode": 0, "cwd": "C:\\Windows\\System32", "truncated": false}}
+{"ts": "2025-09-23T14:31:50", "event": "tool_call", "tool": "shell", "ok": true, "meta": {"returncode": 0, "cwd": "C:\\Windows\\System32", "truncated": false}}
+{"ts": "2025-09-23T14:31:50", "event": "tool_call", "tool": "shell", "ok": true, "meta": {"returncode": 0, "cwd": "C:\\Windows\\System32", "truncated": false}}
+{"ts": "2025-09-23T14:41:21", "event": "startup", "tools": ["files", "hello", "search", "shell", "web"]}
+{"ts": "2025-09-23T14:42:34", "event": "tool_call", "tool": "shell", "ok": true, "meta": {"returncode": 0, "cwd": "C:\\Windows\\System32", "truncated": false}}
+{"ts": "2025-09-23T14:47:30", "event": "startup", "tools": ["files", "hello", "search", "shell", "web"]}
+{"ts": "2025-09-23T14:48:20", "event": "startup", "tools": ["files", "gitops", "hello", "search", "shell", "web"]}
+{"ts": "2025-09-23T15:12:01", "event": "startup", "tools": ["files", "gitops", "hello", "search", "shell", "web"]}
+{"ts": "2025-09-23T15:22:48", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "search", "shell", "web"]}
+{"ts": "2025-09-23T15:22:53", "event": "tool_call", "tool": "httpjson", "ok": false, "meta": {"status": 503, "url": "https://httpbin.org/get", "method": "GET", "headers": {"User-Agent": "FrancisBot/1.0 (+local)"}, "params": {"hello": "world"}, "truncated": false}}
+{"ts": "2025-09-23T15:22:59", "event": "tool_call", "tool": "httpjson", "ok": false, "meta": {"status": 503, "url": "https://httpbin.org/post", "method": "POST", "headers": {"User-Agent": "FrancisBot/1.0 (+local)"}, "params": {}, "truncated": false}}
+{"ts": "2025-09-23T15:23:06", "event": "tool_call", "tool": "httpjson", "ok": true, "meta": {"status": 200, "url": "https://httpbin.org/json", "method": "GET", "headers": {"User-Agent": "FrancisBot/1.0 (+local)"}, "params": {}, "truncated": true, "saved": "C:\\Francis\\agent\\responses\\httpbin.json"}}
+{"ts": "2025-09-23T15:27:49", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web"]}
+{"ts": "2025-09-23T15:27:53", "event": "tool_call", "tool": "kvstore", "ok": true, "meta": {"key": "profile", "path": "C:\\Francis\\agent\\data\\profile.json"}}
+{"ts": "2025-09-23T15:27:57", "event": "tool_call", "tool": "kvstore", "ok": true, "meta": {"key": "profile", "path": "C:\\Francis\\agent\\data\\profile.json"}}
+{"ts": "2025-09-23T15:28:03", "event": "tool_call", "tool": "kvstore", "ok": true, "meta": {"key": "profile", "path": "C:\\Francis\\agent\\data\\profile.json"}}
+{"ts": "2025-09-23T15:28:09", "event": "tool_call", "tool": "kvstore", "ok": true, "meta": {"key": "profile", "path": "C:\\Francis\\agent\\data\\profile.json"}}
+{"ts": "2025-09-23T15:28:14", "event": "tool_call", "tool": "kvstore", "ok": true, "meta": {"key": "metrics", "path": "C:\\Francis\\agent\\data\\metrics.json"}}
+{"ts": "2025-09-23T15:28:14", "event": "tool_call", "tool": "kvstore", "ok": true, "meta": {"key": "metrics", "field": "requests", "value": 3}}
+{"ts": "2025-09-23T15:28:20", "event": "tool_call", "tool": "kvstore", "ok": true, "meta": {"count": 2, "prefix": ""}}
+{"ts": "2025-09-23T15:28:24", "event": "tool_call", "tool": "kvstore", "ok": true, "meta": {"key": "profile"}}
+{"ts": "2025-09-23T15:34:29", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T15:34:33", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 15}}
+{"ts": "2025-09-23T15:34:49", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 2, "dest": "C:\\Francis\\agent\\backups\\notes.zip"}}
+{"ts": "2025-09-23T15:34:54", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 2}}
+{"ts": "2025-09-23T15:34:59", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 2, "dest": "C:\\Francis\\agent\\restore\\notes"}}
+{"ts": "2025-09-23T15:45:14", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T15:48:45", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T15:48:45", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T15:48:45", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T15:48:45", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T15:48:45", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_154838.zip"}}
+{"ts": "2025-09-23T15:48:45", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T15:48:45", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_154838"}}
+{"ts": "2025-09-23T15:48:45", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_154838"}}
+{"ts": "2025-09-23T15:56:02", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T15:56:02", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T15:56:02", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T15:56:02", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T15:56:02", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_155602.zip"}}
+{"ts": "2025-09-23T15:56:03", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T15:56:03", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_155602"}}
+{"ts": "2025-09-23T15:56:03", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_155602"}}
+{"ts": "2025-09-23T15:57:13", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T15:57:13", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T15:57:13", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T15:57:13", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T15:57:13", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_155712.zip"}}
+{"ts": "2025-09-23T15:57:13", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T15:57:13", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_155712"}}
+{"ts": "2025-09-23T15:57:13", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_155712"}}
+{"ts": "2025-09-23T16:03:33", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T16:03:33", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T16:03:33", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T16:03:33", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T16:03:33", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_160333.zip"}}
+{"ts": "2025-09-23T16:03:34", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T16:03:34", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_160333"}}
+{"ts": "2025-09-23T16:03:34", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_160333"}}
+{"ts": "2025-09-23T16:07:58", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T16:07:58", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T16:07:58", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T16:07:58", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T16:07:58", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_160757.zip"}}
+{"ts": "2025-09-23T16:07:58", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T16:07:58", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_160757"}}
+{"ts": "2025-09-23T16:07:58", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_160757"}}
+{"ts": "2025-09-23T16:16:27", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T16:16:27", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T16:16:27", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T16:16:27", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T16:16:27", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_161626.zip"}}
+{"ts": "2025-09-23T16:16:27", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T16:16:27", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_161626"}}
+{"ts": "2025-09-23T16:16:27", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_161626"}}
+{"ts": "2025-09-23T16:55:05", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T16:55:05", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T16:55:05", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T16:55:05", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T16:55:06", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_165505.zip"}}
+{"ts": "2025-09-23T16:55:06", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T16:55:06", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_165505"}}
+{"ts": "2025-09-23T16:55:06", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_165505"}}
+{"ts": "2025-09-23T16:56:10", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T16:56:10", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T16:56:10", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T16:56:10", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T16:56:10", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_165609.zip"}}
+{"ts": "2025-09-23T16:56:10", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T16:56:10", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_165609"}}
+{"ts": "2025-09-23T16:56:10", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_165609"}}
+{"ts": "2025-09-23T16:58:13", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T16:58:13", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T16:58:13", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T16:58:13", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T16:58:13", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_165812.zip"}}
+{"ts": "2025-09-23T16:58:13", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T16:58:13", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_165812"}}
+{"ts": "2025-09-23T16:58:13", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_165812"}}
+{"ts": "2025-09-23T16:58:14", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T16:58:14", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T16:58:14", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T16:58:14", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T16:58:14", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_165812.zip"}}
+{"ts": "2025-09-23T16:58:14", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T16:58:14", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 0, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_165812"}}
+{"ts": "2025-09-23T16:58:15", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_165812"}}
+{"ts": "2025-09-23T17:40:47", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T17:40:47", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T17:40:47", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T17:40:47", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T17:40:47", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_174047.zip"}}
+{"ts": "2025-09-23T17:40:47", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T17:40:48", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_174047"}}
+{"ts": "2025-09-23T17:40:48", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_174047"}}
+{"ts": "2025-09-23T17:44:17", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T17:44:17", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T17:44:17", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T17:44:17", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T17:44:17", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_174417.zip"}}
+{"ts": "2025-09-23T17:44:18", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T17:44:18", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_174417"}}
+{"ts": "2025-09-23T17:44:18", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_174417"}}
+{"ts": "2025-09-23T17:44:19", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T17:44:19", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T17:44:19", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T17:44:19", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T17:44:19", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_174417.zip"}}
+{"ts": "2025-09-23T17:44:19", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T17:44:19", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 0, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_174417"}}
+{"ts": "2025-09-23T17:44:19", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_174417"}}
+{"ts": "2025-09-23T17:46:45", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T17:46:45", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T17:46:45", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T17:46:45", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T17:46:45", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_174644.zip"}}
+{"ts": "2025-09-23T17:46:45", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T17:46:45", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_174644"}}
+{"ts": "2025-09-23T17:46:45", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_174644"}}
+{"ts": "2025-09-23T17:46:46", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T17:46:46", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T17:46:46", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T17:46:46", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T17:46:46", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_174644.zip"}}
+{"ts": "2025-09-23T17:46:46", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T17:46:46", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 0, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_174644"}}
+{"ts": "2025-09-23T17:46:46", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_174644"}}
+{"ts": "2025-09-23T17:56:44", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T17:56:44", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T17:56:44", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T17:56:44", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T17:56:44", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_175643.zip"}}
+{"ts": "2025-09-23T17:56:44", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T17:56:44", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_175643"}}
+{"ts": "2025-09-23T17:56:44", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_175643"}}
+{"ts": "2025-09-23T17:56:45", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T17:56:45", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T17:56:45", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T17:56:45", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T17:56:45", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_175643.zip"}}
+{"ts": "2025-09-23T17:56:45", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T17:56:45", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 0, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_175643"}}
+{"ts": "2025-09-23T17:56:46", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_175643"}}
+{"ts": "2025-09-23T18:28:04", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T18:28:09", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T18:28:09", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T18:28:09", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T18:28:09", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T18:28:09", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_182809.zip"}}
+{"ts": "2025-09-23T18:28:09", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T18:28:09", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_182809"}}
+{"ts": "2025-09-23T18:28:09", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_182809"}}
+{"ts": "2025-09-23T18:28:10", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T18:28:10", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T18:28:10", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T18:28:10", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T18:28:11", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_182809.zip"}}
+{"ts": "2025-09-23T18:28:11", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T18:28:11", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 0, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_182809"}}
+{"ts": "2025-09-23T18:28:11", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_182809"}}
+{"ts": "2025-09-23T18:28:48", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T18:28:48", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T18:28:48", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T18:28:49", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T18:28:49", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_182848.zip"}}
+{"ts": "2025-09-23T18:28:49", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T18:28:49", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_182848"}}
+{"ts": "2025-09-23T18:28:49", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_182848"}}
+{"ts": "2025-09-23T18:28:50", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T18:28:50", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T18:28:50", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T18:28:50", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T18:28:50", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_182848.zip"}}
+{"ts": "2025-09-23T18:28:50", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T18:28:50", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 0, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_182848"}}
+{"ts": "2025-09-23T18:28:50", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_182848"}}
+{"ts": "2025-09-23T19:12:12", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T19:12:12", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T19:12:12", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T19:12:12", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T19:12:12", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_191211.zip"}}
+{"ts": "2025-09-23T19:12:12", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T19:12:12", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_191211"}}
+{"ts": "2025-09-23T19:12:12", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_191211"}}
+{"ts": "2025-09-23T19:12:13", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T19:12:13", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T19:12:13", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T19:12:13", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T19:12:13", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_191211.zip"}}
+{"ts": "2025-09-23T19:12:13", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T19:12:13", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 0, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_191211"}}
+{"ts": "2025-09-23T19:12:14", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_191211"}}
+{"ts": "2025-09-23T19:16:26", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T19:16:26", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T19:16:26", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T19:16:26", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T19:16:26", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_191625.zip"}}
+{"ts": "2025-09-23T19:16:26", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T19:16:26", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_191625"}}
+{"ts": "2025-09-23T19:16:26", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_191625"}}
+{"ts": "2025-09-23T19:16:27", "event": "startup", "tools": ["files", "gitops", "hello", "httpjson", "kvstore", "search", "shell", "web", "zipper"]}
+{"ts": "2025-09-23T19:16:27", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T19:16:27", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 28}}
+{"ts": "2025-09-23T19:16:27", "event": "tool_call", "tool": "files", "ok": true, "meta": {"bytes": 29}}
+{"ts": "2025-09-23T19:16:27", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\backups\\full_notes_20250923_191625.zip"}}
+{"ts": "2025-09-23T19:16:27", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"count": 5}}
+{"ts": "2025-09-23T19:16:27", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 0, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_191625"}}
+{"ts": "2025-09-23T19:16:27", "event": "tool_call", "tool": "zipper", "ok": true, "meta": {"files": 5, "dest": "C:\\Francis\\agent\\restore\\full_notes_20250923_191625"}}

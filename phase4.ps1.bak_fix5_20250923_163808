@@ -1,0 +1,570 @@
+# Phase 4: backup + restore + verify + prune
+
+# --- bootstrap: working dir + UTF-8 ---
+Set-Location 'C:\Francis\agent'
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$env:PYTHONIOENCODING = 'utf-8'
+# --- end bootstrap ---
+
+# --- FrancisBackup event source bootstrap ---
+try {
+  if (-not [System.Diagnostics.EventLog]::SourceExists('FrancisBackup')) {
+    New-EventLog -LogName Application -Source 'FrancisBackup'
+  }
+} catch { }
+# --- end event source bootstrap ---$python  = 'C:\Francis\.venv\Scripts\python.exe'
+$agent   = 'C:\Francis\agent\francis.py'
+$workdir = 'C:\Francis\agent'
+$stamp   = Get-Date -Format 'yyyyMMdd_HHmmss'
+$archive = "backups\full_notes_$stamp.zip"
+$logPath = Join-Path $workdir "backups\phase4_run_$stamp.log"
+
+# Francis command sequence
+$commands = @"
+files op=write path="notes\logs\day1.txt" content="Log start: system initialized"
+files op=write path="notes\logs\day2.md" content="# Day 2\nNotes about testing"
+files op=write path="notes\logs\day3.txt" content="Backup and restore test entry"
+zipper op=zip src="notes" dest="$archive" include="*" level=9
+zipper op=list src="$archive"
+zipper op=unzip src="$archive" dest="restore\full_notes_$stamp" overwrite=false
+zipper op=unzip src="$archive" dest="restore\full_notes_$stamp" overwrite=true
+export
+exit
+"@
+
+# Ensure target folders exist
+New-Item -ItemType Directory -Force -Path (Join-Path $workdir 'notes\logs') | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $workdir 'backups')   | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $workdir 'restore')   | Out-Null
+# --- launch Francis ---
+# Ensure python path is valid; fall back to common locations
+if (-not (Test-Path $python)) {
+    $cands = @(
+        'C:\Francis\.venv\Scripts\python.exe',
+        (Get-Command python.exe -ErrorAction SilentlyContinue).Source
+    ) | Where-Object { $_ -and (Test-Path $_) }
+    if ($cands -and $cands[0]) { $python = $cands[0] } else { throw "Python interpreter not found." }
+$psi = New-Object System.Diagnostics.ProcessStartInfo
+$psi.FileName = $python
+$psi.Arguments = "-X utf8 -u `"$agent`""
+$psi.WorkingDirectory = $workdir
+$psi.RedirectStandardInput  = $true
+$psi.RedirectStandardOutput = $true
+$psi.RedirectStandardError  = $true
+$psi.UseShellExecute = $false
+$psi.EnvironmentVariables['PYTHONIOENCODING'] = 'utf-8'
+
+$proc = New-Object System.Diagnostics.Process
+$proc.StartInfo = $psi
+
+if (-not $proc.StartInfo.FileName) { throw "Launch config error: StartInfo.FileName is blank." }
+
+$null = $proc.Start()
+
+Start-Sleep -Milliseconds 400
+# Send commands line-by-line
+$commands -split "`r?`n" | ForEach-Object {
+    if ($_.Trim().Length -gt 0) {
+        $proc.StandardInput.WriteLine($_)
+        Start-Sleep -Milliseconds 50
+    }
+}
+$proc.StandardInput.Close()
+
+$stdout = $proc.StandardOutput.ReadToEnd()
+$stderr = $proc.StandardError.ReadToEnd()
+$proc.WaitForExit()
+
+"`n==== STDOUT ====`n$stdout`n`n==== STDERR ====`n$stderr" | Set-Content -Encoding UTF8 $logPath
+
+if ($proc.ExitCode -ne 0) {
+    throw "Francis exited with code $($proc.ExitCode). See log: $logPath"
+}
+
+Write-Host "Phase 4 complete."
+Write-Host "Archive: $archive"
+Write-Host "Restore: restore\full_notes_$stamp"
+Write-Host "Logs saved to: $logPath"
+
+# --- integrity verify + retention prune ---
+try {
+    $src  = Join-Path $workdir 'notes'
+    $dest = Get-ChildItem (Join-Path $workdir 'restore') -Directory |
+            Sort-Object LastWriteTime -Desc |
+            Select-Object -First 1 -ExpandProperty FullName
+
+    function Get-TreeHash([string]$root) {
+        Get-ChildItem -Path $root -File -Recurse | ForEach-Object {
+            $rel = $_.FullName.Substring($root.Length).TrimStart('\')
+            [PSCustomObject]@{
+                Path = $rel
+                Hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash
+            }
+        }
+    }
+
+    $a = Get-TreeHash $src
+    $b = Get-TreeHash $dest
+
+    if (-not (Compare-Object $a $b -Property Path,Hash)) {
+        Write-Host "Integrity: OK (hashes match)"
+    } else {
+        Write-Warning "Integrity: MISMATCH"
+    }
+
+    Get-ChildItem 'C:\Francis\agent\backups\full_notes_*.zip' |
+        Where-Object LastWriteTime -lt (Get-Date).AddDays(-14) |
+        Remove-Item -Force
+    Write-Host "Retention: pruned backups older than 14 days (if any)."
+}
+catch {
+    Write-Warning "Verify/Prune block error: $($_.Exception.Message)"
+}
+# --- end integrity + retention ---
+
+# --- encrypted copy with 7-Zip (AES-256) ---
+try {
+    $sevenZip = 'C:\Program Files\7-Zip\7z.exe'
+    if (-not (Test-Path $sevenZip)) { throw "7-Zip not found at $sevenZip" }
+
+    $pass = [System.Environment]::GetEnvironmentVariable("FRANCIS_ZIP_PASS","Machine")
+    if (-not $pass) { throw "FRANCIS_ZIP_PASS environment variable not set" }
+
+    $src = Join-Path $workdir 'notes\*'
+    $encOut = Join-Path $workdir ("backups\full_notes_{0}_secure.zip" -f $stamp)
+
+    & $sevenZip a -tzip $encOut $src -mx=9 -p$pass -mem=AES256 | Out-Null
+    Write-Host "Encrypted archive created: $encOut"
+}
+catch {
+    Write-Warning "Encrypted ZIP step failed: $($_.Exception.Message)"
+}
+# --- end encrypted copy ---
+
+# --- offsite sync + checksum + alerts + size-cap retention ---
+try {
+    # 1) Checksum for the secure zip
+    if (-not (Test-Path $encOut)) { throw "Secure archive path not found: $encOut" }
+    $shaPath = "$encOut.sha256"
+    $h = Get-FileHash -Algorithm SHA256 -Path $encOut
+    "{0} {1}  {2}" -f $h.Algorithm, $h.Hash, (Split-Path $encOut -Leaf) | Set-Content -Encoding ASCII $shaPath
+    Write-Host "Checksum written: $shaPath"
+
+    # 2) Offsite copy to OneDrive (Backups\Francis) with retry
+    $oneDrive = $env:OneDrive
+    if (-not $oneDrive) { throw "OneDrive path not found. Sign into OneDrive or set `$env:OneDrive." }
+    $offDir = Join-Path $oneDrive 'Backups\Francis'
+    New-Item -ItemType Directory -Force -Path $offDir | Out-Null
+
+    $toCopy = @($encOut, $shaPath)
+    foreach ($srcFile in $toCopy) {
+        $destFile = Join-Path $offDir (Split-Path $srcFile -Leaf)
+        $ok = $false
+        for ($i=1; $i -le 3 -and -not $ok; $i++) {
+            try {
+                Copy-Item -LiteralPath $srcFile -Destination $destFile -Force -ErrorAction Stop
+                $ok = $true
+            } catch {
+                Start-Sleep -Seconds ([math]::Pow(2, $i))  # 2,4,8s
+            }
+        }
+        if (-not $ok) { throw "Offsite copy failed for $srcFile after retries." }
+    }
+    Write-Host "Offsite sync complete: $offDir"
+
+    # 3) Size-cap retention (keep backups folder under 5 GB total)
+    $capBytes = 5GB
+    $bakDir = Join-Path $workdir 'backups'
+    $getTotal = { (Get-ChildItem $bakDir -File | Measure-Object Length -Sum).Sum }
+    $total = & $getTotal
+
+    while ($total -gt $capBytes) {
+        # Oldest .zip (prefer pruning the oldest archive + its checksum)
+        $oldZip = Get-ChildItem $bakDir -File -Filter '*.zip' | Sort-Object LastWriteTime | Select-Object -First 1
+        if (-not $oldZip) { break }
+        $oldSha = "$($oldZip.FullName).sha256"
+        Remove-Item -Force $oldZip.FullName -ErrorAction SilentlyContinue
+        if (Test-Path $oldSha) { Remove-Item -Force $oldSha -ErrorAction SilentlyContinue }
+        $total = & $getTotal
+    }
+    Write-Host ("Retention (size-cap): backups now {0:N2} GB" -f ($total/1GB))
+
+    # 4) Event Log: success
+    Write-EventLog -LogName Application -Source 'FrancisBackup' -EventId 4101 -EntryType Information `
+        -Message ("Francis backup SUCCESS. Local: {0}; OneDrive: {1}" -f $encOut, (Join-Path $offDir (Split-Path $encOut -Leaf)))
+}
+catch {
+    $msg = "Francis backup FAILED: $($_.Exception.Message)"
+    Write-Warning $msg
+    try {
+        Write-EventLog -LogName Application -Source 'FrancisBackup' -EventId 4102 -EntryType Error -Message $msg
+    } catch { }
+    throw
+}
+# --- end offsite + checksum + alerts + size-cap retention ---
+
+# --- bootstrap: working dir + UTF-8 ---
+Set-Location 'C:\Francis\agent'
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$env:PYTHONIOENCODING = 'utf-8'
+# --- end bootstrap ---
+
+# --- FrancisBackup event source bootstrap ---
+try {
+  if (-not [System.Diagnostics.EventLog]::SourceExists('FrancisBackup')) {
+    New-EventLog -LogName Application -Source 'FrancisBackup'
+  }
+} catch { }
+# --- end event source bootstrap ---$python  = 'C:\Francis\.venv\Scripts\python.exe'
+$agent   = 'C:\Francis\agent\francis.py'
+$workdir = 'C:\Francis\agent'
+$stamp   = Get-Date -Format 'yyyyMMdd_HHmmss'
+$archive = "backups\full_notes_$stamp.zip"
+$logPath = Join-Path $workdir "backups\phase4_run_$stamp.log"
+
+# Francis command sequence
+$commands = @"
+files op=write path="notes\logs\day1.txt" content="Log start: system initialized"
+files op=write path="notes\logs\day2.md" content="# Day 2\nNotes about testing"
+files op=write path="notes\logs\day3.txt" content="Backup and restore test entry"
+zipper op=zip src="notes" dest="$archive" include="*" level=9
+zipper op=list src="$archive"
+zipper op=unzip src="$archive" dest="restore\full_notes_$stamp" overwrite=false
+zipper op=unzip src="$archive" dest="restore\full_notes_$stamp" overwrite=true
+export
+exit
+"@
+
+# Ensure target folders exist
+New-Item -ItemType Directory -Force -Path (Join-Path $workdir 'notes\logs') | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $workdir 'backups')   | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $workdir 'restore')   | Out-Null
+# --- launch Francis ---
+# Ensure python path is valid; fall back to common locations
+if (-not (Test-Path $python)) {
+    $cands = @(
+        'C:\Francis\.venv\Scripts\python.exe',
+        (Get-Command python.exe -ErrorAction SilentlyContinue).Source
+    ) | Where-Object { $_ -and (Test-Path $_) }
+    if ($cands -and $cands[0]) { $python = $cands[0] } else { throw "Python interpreter not found." }
+$psi = New-Object System.Diagnostics.ProcessStartInfo
+$psi.FileName = $python
+$psi.Arguments = "-X utf8 -u `"$agent`""
+$psi.WorkingDirectory = $workdir
+$psi.RedirectStandardInput  = $true
+$psi.RedirectStandardOutput = $true
+$psi.RedirectStandardError  = $true
+$psi.UseShellExecute = $false
+$psi.EnvironmentVariables['PYTHONIOENCODING'] = 'utf-8'
+
+$proc = New-Object System.Diagnostics.Process
+$proc.StartInfo = $psi
+
+if (-not $proc.StartInfo.FileName) { throw "Launch config error: StartInfo.FileName is blank." }
+
+$null = $proc.Start()
+
+Start-Sleep -Milliseconds 400
+# Send commands line-by-line
+$commands -split "`r?`n" | ForEach-Object {
+    if ($_.Trim().Length -gt 0) {
+        $proc.StandardInput.WriteLine($_)
+        Start-Sleep -Milliseconds 50
+    }
+}
+$proc.StandardInput.Close()
+
+$stdout = $proc.StandardOutput.ReadToEnd()
+$stderr = $proc.StandardError.ReadToEnd()
+$proc.WaitForExit()
+
+"`n==== STDOUT ====`n$stdout`n`n==== STDERR ====`n$stderr" | Set-Content -Encoding UTF8 $logPath
+
+if ($proc.ExitCode -ne 0) {
+    throw "Francis exited with code $($proc.ExitCode). See log: $logPath"
+}
+
+Write-Host "Phase 4 complete."
+Write-Host "Archive: $archive"
+Write-Host "Restore: restore\full_notes_$stamp"
+Write-Host "Logs saved to: $logPath"
+
+# --- integrity verify + retention prune ---
+try {
+    $src  = Join-Path $workdir 'notes'
+    $dest = Get-ChildItem (Join-Path $workdir 'restore') -Directory |
+            Sort-Object LastWriteTime -Desc |
+            Select-Object -First 1 -ExpandProperty FullName
+
+    function Get-TreeHash([string]$root) {
+        Get-ChildItem -Path $root -File -Recurse | ForEach-Object {
+            $rel = $_.FullName.Substring($root.Length).TrimStart('\')
+            [PSCustomObject]@{
+                Path = $rel
+                Hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash
+            }
+        }
+    }
+
+    $a = Get-TreeHash $src
+    $b = Get-TreeHash $dest
+
+    if (-not (Compare-Object $a $b -Property Path,Hash)) {
+        Write-Host "Integrity: OK (hashes match)"
+    } else {
+        Write-Warning "Integrity: MISMATCH"
+    }
+
+    Get-ChildItem 'C:\Francis\agent\backups\full_notes_*.zip' |
+        Where-Object LastWriteTime -lt (Get-Date).AddDays(-14) |
+        Remove-Item -Force
+    Write-Host "Retention: pruned backups older than 14 days (if any)."
+}
+catch {
+    Write-Warning "Verify/Prune block error: $($_.Exception.Message)"
+}
+# --- end integrity + retention ---
+
+# --- encrypted copy with 7-Zip (AES-256) ---
+try {
+    $sevenZip = 'C:\Program Files\7-Zip\7z.exe'
+    if (-not (Test-Path $sevenZip)) { throw "7-Zip not found at $sevenZip" }
+
+    $pass = [System.Environment]::GetEnvironmentVariable("FRANCIS_ZIP_PASS","Machine")
+    if (-not $pass) { throw "FRANCIS_ZIP_PASS environment variable not set" }
+
+    $src = Join-Path $workdir 'notes\*'
+    $encOut = Join-Path $workdir ("backups\full_notes_{0}_secure.zip" -f $stamp)
+
+    & $sevenZip a -tzip $encOut $src -mx=9 -p$pass -mem=AES256 | Out-Null
+    Write-Host "Encrypted archive created: $encOut"
+}
+catch {
+    Write-Warning "Encrypted ZIP step failed: $($_.Exception.Message)"
+}
+# --- end encrypted copy ---
+
+# --- offsite sync + checksum + alerts + size-cap retention ---
+try {
+    # 1) Checksum for the secure zip
+    if (-not (Test-Path $encOut)) { throw "Secure archive path not found: $encOut" }
+    $shaPath = "$encOut.sha256"
+    $h = Get-FileHash -Algorithm SHA256 -Path $encOut
+    "{0} {1}  {2}" -f $h.Algorithm, $h.Hash, (Split-Path $encOut -Leaf) | Set-Content -Encoding ASCII $shaPath
+    Write-Host "Checksum written: $shaPath"
+
+    # 2) Offsite copy to OneDrive (Backups\Francis) with retry
+    $oneDrive = $env:OneDrive
+    if (-not $oneDrive) { throw "OneDrive path not found. Sign into OneDrive or set `$env:OneDrive." }
+    $offDir = Join-Path $oneDrive 'Backups\Francis'
+    New-Item -ItemType Directory -Force -Path $offDir | Out-Null
+
+    $toCopy = @($encOut, $shaPath)
+    foreach ($srcFile in $toCopy) {
+        $destFile = Join-Path $offDir (Split-Path $srcFile -Leaf)
+        $ok = $false
+        for ($i=1; $i -le 3 -and -not $ok; $i++) {
+            try {
+                Copy-Item -LiteralPath $srcFile -Destination $destFile -Force -ErrorAction Stop
+                $ok = $true
+            } catch {
+                Start-Sleep -Seconds ([math]::Pow(2, $i))  # 2,4,8s
+            }
+        }
+        if (-not $ok) { throw "Offsite copy failed for $srcFile after retries." }
+    }
+    Write-Host "Offsite sync complete: $offDir"
+
+    # 3) Size-cap retention (keep backups folder under 5 GB total)
+    $capBytes = 5GB
+    $bakDir = Join-Path $workdir 'backups'
+    $getTotal = { (Get-ChildItem $bakDir -File | Measure-Object Length -Sum).Sum }
+    $total = & $getTotal
+
+    while ($total -gt $capBytes) {
+        # Oldest .zip (prefer pruning the oldest archive + its checksum)
+        $oldZip = Get-ChildItem $bakDir -File -Filter '*.zip' | Sort-Object LastWriteTime | Select-Object -First 1
+        if (-not $oldZip) { break }
+        $oldSha = "$($oldZip.FullName).sha256"
+        Remove-Item -Force $oldZip.FullName -ErrorAction SilentlyContinue
+        if (Test-Path $oldSha) { Remove-Item -Force $oldSha -ErrorAction SilentlyContinue }
+        $total = & $getTotal
+    }
+    Write-Host ("Retention (size-cap): backups now {0:N2} GB" -f ($total/1GB))
+
+    # 4) Event Log: success
+    Write-EventLog -LogName Application -Source 'FrancisBackup' -EventId 4101 -EntryType Information `
+        -Message ("Francis backup SUCCESS. Local: {0}; OneDrive: {1}" -f $encOut, (Join-Path $offDir (Split-Path $encOut -Leaf)))
+}
+catch {
+    $msg = "Francis backup FAILED: $($_.Exception.Message)"
+    Write-Warning $msg
+    try {
+        Write-EventLog -LogName Application -Source 'FrancisBackup' -EventId 4102 -EntryType Error -Message $msg
+    } catch { }
+    throw
+}
+# --- end offsite + checksum + alerts + size-cap retention ---
+
+    if ($cands -and $cands[0]) { $python = $cands[0] } else { throw "Python interpreter not found." }
+$psi = New-Object System.Diagnostics.ProcessStartInfo
+$psi.FileName = $python
+$psi.Arguments = "-X utf8 -u `"$agent`""
+$psi.WorkingDirectory = $workdir
+$psi.RedirectStandardInput  = $true
+$psi.RedirectStandardOutput = $true
+$psi.RedirectStandardError  = $true
+$psi.UseShellExecute = $false
+$psi.EnvironmentVariables['PYTHONIOENCODING'] = 'utf-8'
+
+$proc = New-Object System.Diagnostics.Process
+$proc.StartInfo = $psi
+
+if (-not $proc.StartInfo.FileName) { throw "Launch config error: StartInfo.FileName is blank." }
+
+$null = $proc.Start()
+
+Start-Sleep -Milliseconds 400
+# Send commands line-by-line
+$commands -split "`r?`n" | ForEach-Object {
+    if ($_.Trim().Length -gt 0) {
+        $proc.StandardInput.WriteLine($_)
+        Start-Sleep -Milliseconds 50
+    }
+}
+$proc.StandardInput.Close()
+
+$stdout = $proc.StandardOutput.ReadToEnd()
+$stderr = $proc.StandardError.ReadToEnd()
+$proc.WaitForExit()
+
+"`n==== STDOUT ====`n$stdout`n`n==== STDERR ====`n$stderr" | Set-Content -Encoding UTF8 $logPath
+
+if ($proc.ExitCode -ne 0) {
+    throw "Francis exited with code $($proc.ExitCode). See log: $logPath"
+}
+
+Write-Host "Phase 4 complete."
+Write-Host "Archive: $archive"
+Write-Host "Restore: restore\full_notes_$stamp"
+Write-Host "Logs saved to: $logPath"
+
+# --- integrity verify + retention prune ---
+try {
+    $src  = Join-Path $workdir 'notes'
+    $dest = Get-ChildItem (Join-Path $workdir 'restore') -Directory |
+            Sort-Object LastWriteTime -Desc |
+            Select-Object -First 1 -ExpandProperty FullName
+
+    function Get-TreeHash([string]$root) {
+        Get-ChildItem -Path $root -File -Recurse | ForEach-Object {
+            $rel = $_.FullName.Substring($root.Length).TrimStart('\')
+            [PSCustomObject]@{
+                Path = $rel
+                Hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash
+            }
+        }
+    }
+
+    $a = Get-TreeHash $src
+    $b = Get-TreeHash $dest
+
+    if (-not (Compare-Object $a $b -Property Path,Hash)) {
+        Write-Host "Integrity: OK (hashes match)"
+    } else {
+        Write-Warning "Integrity: MISMATCH"
+    }
+
+    Get-ChildItem 'C:\Francis\agent\backups\full_notes_*.zip' |
+        Where-Object LastWriteTime -lt (Get-Date).AddDays(-14) |
+        Remove-Item -Force
+    Write-Host "Retention: pruned backups older than 14 days (if any)."
+}
+catch {
+    Write-Warning "Verify/Prune block error: $($_.Exception.Message)"
+}
+# --- end integrity + retention ---
+
+# --- encrypted copy with 7-Zip (AES-256) ---
+try {
+    $sevenZip = 'C:\Program Files\7-Zip\7z.exe'
+    if (-not (Test-Path $sevenZip)) { throw "7-Zip not found at $sevenZip" }
+
+    $pass = [System.Environment]::GetEnvironmentVariable("FRANCIS_ZIP_PASS","Machine")
+    if (-not $pass) { throw "FRANCIS_ZIP_PASS environment variable not set" }
+
+    $src = Join-Path $workdir 'notes\*'
+    $encOut = Join-Path $workdir ("backups\full_notes_{0}_secure.zip" -f $stamp)
+
+    & $sevenZip a -tzip $encOut $src -mx=9 -p$pass -mem=AES256 | Out-Null
+    Write-Host "Encrypted archive created: $encOut"
+}
+catch {
+    Write-Warning "Encrypted ZIP step failed: $($_.Exception.Message)"
+}
+# --- end encrypted copy ---
+
+# --- offsite sync + checksum + alerts + size-cap retention ---
+try {
+    # 1) Checksum for the secure zip
+    if (-not (Test-Path $encOut)) { throw "Secure archive path not found: $encOut" }
+    $shaPath = "$encOut.sha256"
+    $h = Get-FileHash -Algorithm SHA256 -Path $encOut
+    "{0} {1}  {2}" -f $h.Algorithm, $h.Hash, (Split-Path $encOut -Leaf) | Set-Content -Encoding ASCII $shaPath
+    Write-Host "Checksum written: $shaPath"
+
+    # 2) Offsite copy to OneDrive (Backups\Francis) with retry
+    $oneDrive = $env:OneDrive
+    if (-not $oneDrive) { throw "OneDrive path not found. Sign into OneDrive or set `$env:OneDrive." }
+    $offDir = Join-Path $oneDrive 'Backups\Francis'
+    New-Item -ItemType Directory -Force -Path $offDir | Out-Null
+
+    $toCopy = @($encOut, $shaPath)
+    foreach ($srcFile in $toCopy) {
+        $destFile = Join-Path $offDir (Split-Path $srcFile -Leaf)
+        $ok = $false
+        for ($i=1; $i -le 3 -and -not $ok; $i++) {
+            try {
+                Copy-Item -LiteralPath $srcFile -Destination $destFile -Force -ErrorAction Stop
+                $ok = $true
+            } catch {
+                Start-Sleep -Seconds ([math]::Pow(2, $i))  # 2,4,8s
+            }
+        }
+        if (-not $ok) { throw "Offsite copy failed for $srcFile after retries." }
+    }
+    Write-Host "Offsite sync complete: $offDir"
+
+    # 3) Size-cap retention (keep backups folder under 5 GB total)
+    $capBytes = 5GB
+    $bakDir = Join-Path $workdir 'backups'
+    $getTotal = { (Get-ChildItem $bakDir -File | Measure-Object Length -Sum).Sum }
+    $total = & $getTotal
+
+    while ($total -gt $capBytes) {
+        # Oldest .zip (prefer pruning the oldest archive + its checksum)
+        $oldZip = Get-ChildItem $bakDir -File -Filter '*.zip' | Sort-Object LastWriteTime | Select-Object -First 1
+        if (-not $oldZip) { break }
+        $oldSha = "$($oldZip.FullName).sha256"
+        Remove-Item -Force $oldZip.FullName -ErrorAction SilentlyContinue
+        if (Test-Path $oldSha) { Remove-Item -Force $oldSha -ErrorAction SilentlyContinue }
+        $total = & $getTotal
+    }
+    Write-Host ("Retention (size-cap): backups now {0:N2} GB" -f ($total/1GB))
+
+    # 4) Event Log: success
+    Write-EventLog -LogName Application -Source 'FrancisBackup' -EventId 4101 -EntryType Information `
+        -Message ("Francis backup SUCCESS. Local: {0}; OneDrive: {1}" -f $encOut, (Join-Path $offDir (Split-Path $encOut -Leaf)))
+}
+catch {
+    $msg = "Francis backup FAILED: $($_.Exception.Message)"
+    Write-Warning $msg
+    try {
+        Write-EventLog -LogName Application -Source 'FrancisBackup' -EventId 4102 -EntryType Error -Message $msg
+    } catch { }
+    throw
+}
+# --- end offsite + checksum + alerts + size-cap retention ---
+
+
+
