@@ -1120,3 +1120,12 @@ class Francis:
 if __name__ == "__main__":
     CFG = Config(DEFAULT_CFG)
     Francis(CFG).run()
+
+
+def main() -> None:
+    # TODO: call your actual loop here
+    print("francis CLI is alive")
+
+
+if __name__ == "__main__":
+    main()
