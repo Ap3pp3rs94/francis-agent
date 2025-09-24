@@ -1,13 +1,25 @@
-# Build/output
-backups/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+env/
+venv/
+
+# data/state/outputs
+logs/
+data/
+*.sqlite*
+*.db
+exports/
 restore/
+backups/
 *.zip
-*.zip.sha256
 *.log
 
-# Agent exports
-*.sqlite
-memory_*.json
+# scratch/notes
+notes/
+responses/
 
-# Test artifacts
-test-results.xml
+# OS cruft
+.DS_Store
+Thumbs.db
