@@ -1,17 +1,8 @@
-# Francis Agent — Phase 4
+# Francis Agent
+Local autonomy loop with tools (files, gitops, httpjson, kvstore, search, shell, web).
 
-## Run
-powershell -NoProfile -ExecutionPolicy Bypass -File .\phase4.ps1
-
-## Dry-run
-powershell -NoProfile -ExecutionPolicy Bypass -File .\phase4.ps1 -DryRun
-
-## Tests
-.\Test-Phase4.ps1 | Format-List
-Invoke-Pester .\Tests -OutputFormat NUnitXml -OutputFile .\test-results.xml
-
-## Latest secure backup
-Get-ChildItem .\backups\*_secure.zip | Sort-Object LastWriteTime -Desc | Select-Object -First 1
-
-## Restore (example)
-Expand-Archive .\backups\full_notes_YYYYMMDD_HHMMSS.zip -DestinationPath .\restore\full_notes_YYYYMMDD_HHMMSS
+## Quickstart
+python -m venv .venv
+. .venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python C:\Francis\agent\francis.py
