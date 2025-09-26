@@ -40,3 +40,6 @@ coverage.xml
 .mypy_cache/
 
 *.bak
+
+*.bak
+
