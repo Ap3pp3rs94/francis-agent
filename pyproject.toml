@@ -11,6 +11,8 @@ license = "MIT"
 authors = [{ name = "Ap3pp3rs94" }]
 requires-python = ">=3.11"
 
+license-files = ['LICENSE']
+
 [project.urls]
 Homepage = "https://github.com/Ap3pp3rs94/francis-agent"
 
@@ -22,6 +24,7 @@ py-modules = ["francis"]
 
 [tool.setuptools.packages.find]
 include = ["tools", "tools.*"]
+
 
 
 
