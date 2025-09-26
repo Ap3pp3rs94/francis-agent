@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "francis-agent"
-version = "1.0.4"
+version = "1.0.6"
 description = "Local autonomy loop with tools"
 readme = "README.md"
 license = "MIT"
@@ -16,9 +16,6 @@ license-files = ['LICENSE']
 [project.urls]
 Homepage = "https://github.com/Ap3pp3rs94/francis-agent"
 
-[project.scripts]
-francis = "francis:main"
-
 [tool.setuptools]
 py-modules = ["francis"]
 
@@ -28,4 +25,14 @@ include = ["tools", "tools.*"]
 
 
 
+
+[tool.poetry]
+package-mode = true
+packages = [{ include = "francis" }]
+
+
+
+
+[project.scripts]
+francis = "francis:entrypoint"
 
