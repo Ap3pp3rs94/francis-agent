@@ -1,5 +1,17 @@
-* text=auto
-*.ps1   text eol=lf
-*.py    text eol=lf
-*.sh    text eol=lf
-*.md    text eol=lf
+# text defaults
+*         text=auto
+
+# force LF for these
+*.yml     text eol=lf
+*.yaml    text eol=lf
+*.md      text eol=lf
+*.toml    text eol=lf
+*.py      text eol=lf
+*.sh      text eol=lf
+
+# binary
+*.png     binary
+*.jpg     binary
+*.gif     binary
+*.exe     binary
+*.dll     binary
