@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "francis-agent"
-version = "1.0.3"
+version = "1.0.4"
 description = "Local autonomy loop with tools"
 readme = "README.md"
 license = "MIT"
