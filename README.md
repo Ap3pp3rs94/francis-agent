@@ -16,3 +16,11 @@ pre-commit run --all-files
 pytest -q
 
 
+
+## CLI
+
+`ash
+francis --version
+francis
+``r
+
