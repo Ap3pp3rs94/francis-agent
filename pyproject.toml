@@ -1,38 +1,17 @@
 [build-system]
-requires = ["setuptools>=69", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core>=1.7.0"]
+build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "francis-agent"
-version = "1.0.6"
-description = "Local autonomy loop with tools"
+version = "1.0.10"
+description = "Francis agent"
 readme = "README.md"
-license = "MIT"
-authors = [{ name = "Ap3pp3rs94" }]
-requires-python = ">=3.11"
-
-license-files = ['LICENSE']
-
-[project.urls]
-Homepage = "https://github.com/Ap3pp3rs94/francis-agent"
-
-[tool.setuptools]
-py-modules = ["francis"]
-
-[tool.setuptools.packages.find]
-include = ["tools", "tools.*"]
-
-
-
-
-
-[tool.poetry]
-package-mode = true
-packages = [{ include = "francis" }]
-
-
-
+requires-python = ">=3.10"
 
 [project.scripts]
 francis = "francis:entrypoint"
 
+[tool.poetry]
+package-mode = true
+packages = [{ include = "francis" }]

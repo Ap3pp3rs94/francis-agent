@@ -1,45 +1,20 @@
-__pycache__/
-*.py[cod]
-*.egg-info/
-.venv/
-env/
-venv/
-
-# data/state/outputs
-logs/
-data/
-*.sqlite*
-*.db
-exports/
-restore/
-backups/
-*.zip
-*.log
-
-# scratch/notes
-notes/
-responses/
-
-# OS cruft
-.DS_Store
-Thumbs.db
-exports/
-restore/
-backups/
-*.zip
-*.log
-
-# test outputs
-test-results.xml
-# build artifacts
+# venvs / build output
+.venv*
+venv*
 dist/
 build/
+__pycache__/# Virtual envs
+.venv/
+.venv-*/
+venv/
+fa-smoke-*/
+# Python
+*.pyc
+*.pyo
+*.pyd
 *.egg-info/
-coverage.xml
-.pytest_cache/
+# Build
+# Caches
 .mypy_cache/
-
-*.bak
-
-*.bak
-
+.pytest_cache/
+.cache/

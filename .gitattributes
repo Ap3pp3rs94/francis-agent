@@ -1,4 +1,2 @@
-# Normalize to LF by default
 * text=auto eol=lf
-# Keep Windows-friendly endings for PowerShell scripts
 *.ps1 text eol=crlf

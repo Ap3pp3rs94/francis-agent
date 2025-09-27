@@ -1,0 +1,414 @@
+[
+  {
+    "id": "a79547b3d604",
+    "timestamp": "2025-09-23T14:31:21",
+    "goal": "hello",
+    "plan": [
+      "1. Echo for traceability \u2192 shell"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Shell obeys allow/deny lists."
+  },
+  {
+    "id": "ae880c3b239f",
+    "timestamp": "2025-09-23T14:31:50",
+    "goal": "hello who=Ap3pp note=\"Plugins are live\"",
+    "plan": [
+      "1. Echo for traceability \u2192 shell"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Shell obeys allow/deny lists."
+  },
+  {
+    "id": "d5f3766deff7",
+    "timestamp": "2025-09-23T14:31:50",
+    "goal": "search pattern=\"Francis\" glob=\"**/*.py\" max_matches=10",
+    "plan": [
+      "1. Echo for traceability \u2192 shell"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Shell obeys allow/deny lists."
+  },
+  {
+    "id": "61964f9e6d00",
+    "timestamp": "2025-09-23T14:42:34",
+    "goal": "notepad C:\\Francis\\agent\\config.toml",
+    "plan": [
+      "1. Echo for traceability \u2192 shell"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Shell obeys allow/deny lists."
+  },
+  {
+    "id": "c062b06229a2",
+    "timestamp": "2025-09-23T15:22:53",
+    "goal": "httpjson op=GET url=\"https://httpbin.org/get\" query='{\"hello\":\"world\"}'",
+    "plan": [
+      "1. httpjson with args \u2192 httpjson"
+    ],
+    "outcome": "1:ERR",
+    "reflection": "Run 1 actions | All OK: False | Some actions failed; consider allowlists/timeouts."
+  },
+  {
+    "id": "1023c0daa3b6",
+    "timestamp": "2025-09-23T15:22:59",
+    "goal": "httpjson op=POST url=\"https://httpbin.org/post\" json='{\"name\":\"Francis\"}'",
+    "plan": [
+      "1. httpjson with args \u2192 httpjson"
+    ],
+    "outcome": "1:ERR",
+    "reflection": "Run 1 actions | All OK: False | Some actions failed; consider allowlists/timeouts."
+  },
+  {
+    "id": "ca5d366b149e",
+    "timestamp": "2025-09-23T15:23:06",
+    "goal": "httpjson op=GET url=\"https://httpbin.org/json\" save_to=\"responses\\\\httpbin.json\"",
+    "plan": [
+      "1. httpjson with args \u2192 httpjson"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "ebe306531f04",
+    "timestamp": "2025-09-23T15:23:25",
+    "goal": "TaskGraph executed",
+    "plan": [
+      "1. shell {\"cmd\": \"echo Hello ${msg}!\"}",
+      "2. files {\"op\": \"write\", \"path\": \"notes\\\\hello.txt\", \"content\": \"Hi ${msg}\"}",
+      "3. web {\"url\": \"https://example.com\"}"
+    ],
+    "outcome": "1:OK; 2:OK; 3:OK",
+    "reflection": "Run 3 actions | All OK: True | Files are sandboxed to 'files.root'.; Shell obeys allow/deny lists."
+  },
+  {
+    "id": "dba06de437c6",
+    "timestamp": "2025-09-23T15:27:53",
+    "goal": "kvstore op=set key=\"profile\" value='{\"name\":\"Ap3pp\",\"level\":\"ultra\"}'",
+    "plan": [
+      "1. kvstore with args \u2192 kvstore"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "85a969aa04d2",
+    "timestamp": "2025-09-23T15:27:57",
+    "goal": "kvstore op=get key=\"profile\"",
+    "plan": [
+      "1. kvstore with args \u2192 kvstore"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "3e716f6b6f8c",
+    "timestamp": "2025-09-23T15:28:03",
+    "goal": "kvstore op=get key=\"profile\"",
+    "plan": [
+      "1. kvstore with args \u2192 kvstore"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "e657d4c2376f",
+    "timestamp": "2025-09-23T15:28:09",
+    "goal": "kvstore op=merge key=\"profile\" value='{\"level\":\"omega\"}'",
+    "plan": [
+      "1. kvstore with args \u2192 kvstore"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "0a955e922911",
+    "timestamp": "2025-09-23T15:28:14",
+    "goal": "kvstore op=set key=\"metrics\" value='{\"requests\":0}'",
+    "plan": [
+      "1. kvstore with args \u2192 kvstore"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "ba8e28af50a3",
+    "timestamp": "2025-09-23T15:28:14",
+    "goal": "kvstore op=incr key=\"metrics\" field=\"requests\" by=\"3\"",
+    "plan": [
+      "1. kvstore with args \u2192 kvstore"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "9724940d41ef",
+    "timestamp": "2025-09-23T15:28:20",
+    "goal": "kvstore op=list",
+    "plan": [
+      "1. kvstore with args \u2192 kvstore"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "383a27f44e0e",
+    "timestamp": "2025-09-23T15:28:24",
+    "goal": "kvstore op=delete key=\"profile\"",
+    "plan": [
+      "1. kvstore with args \u2192 kvstore"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "27dce3530c9f",
+    "timestamp": "2025-09-23T15:34:33",
+    "goal": "files op=write path=\"notes\\\\readme.md\" content=\"# hello\\nzip me\"",
+    "plan": [
+      "1. files with args \u2192 files"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Files are sandboxed to 'files.root'."
+  },
+  {
+    "id": "56113e6913bd",
+    "timestamp": "2025-09-23T15:34:49",
+    "goal": "zipper op=zip src=\"notes\" dest=\"backups\\\\notes.zip\" include=\"*.md;*.txt\" level=6",
+    "plan": [
+      "1. zipper with args \u2192 zipper"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "841b3425fd14",
+    "timestamp": "2025-09-23T15:34:54",
+    "goal": "zipper op=list src=\"backups\\\\notes.zip\"",
+    "plan": [
+      "1. zipper with args \u2192 zipper"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "15095ea1ff2e",
+    "timestamp": "2025-09-23T15:34:59",
+    "goal": "zipper op=unzip src=\"backups\\\\notes.zip\" dest=\"restore\\\\notes\" overwrite=false",
+    "plan": [
+      "1. zipper with args \u2192 zipper"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "88af6e393bf1",
+    "timestamp": "2025-09-23T15:48:45",
+    "goal": "files op=write path=\"notes\\logs\\day1.txt\" content=\"Log start: system initialized\"",
+    "plan": [
+      "1. files with args \u2192 files"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Files are sandboxed to 'files.root'."
+  },
+  {
+    "id": "bf22c1705d6b",
+    "timestamp": "2025-09-23T15:48:45",
+    "goal": "files op=write path=\"notes\\logs\\day2.md\" content=\"# Day 2\\nNotes about testing\"",
+    "plan": [
+      "1. files with args \u2192 files"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Files are sandboxed to 'files.root'."
+  },
+  {
+    "id": "645edf8bd25c",
+    "timestamp": "2025-09-23T15:48:45",
+    "goal": "files op=write path=\"notes\\logs\\day3.txt\" content=\"Backup and restore test entry\"",
+    "plan": [
+      "1. files with args \u2192 files"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Files are sandboxed to 'files.root'."
+  },
+  {
+    "id": "14b650c5456c",
+    "timestamp": "2025-09-23T15:48:45",
+    "goal": "zipper op=zip src=\"notes\" dest=\"backups\\full_notes_20250923_154838.zip\" include=\"*\" level=9",
+    "plan": [
+      "1. zipper with args \u2192 zipper"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "0823e049e261",
+    "timestamp": "2025-09-23T15:48:45",
+    "goal": "zipper op=list src=\"backups\\full_notes_20250923_154838.zip\"",
+    "plan": [
+      "1. zipper with args \u2192 zipper"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "7c315e557cc3",
+    "timestamp": "2025-09-23T15:48:45",
+    "goal": "zipper op=unzip src=\"backups\\full_notes_20250923_154838.zip\" dest=\"restore\\full_notes_20250923_154838\" overwrite=false",
+    "plan": [
+      "1. zipper with args \u2192 zipper"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "908918fb34a9",
+    "timestamp": "2025-09-23T15:48:45",
+    "goal": "zipper op=unzip src=\"backups\\full_notes_20250923_154838.zip\" dest=\"restore\\full_notes_20250923_154838\" overwrite=true",
+    "plan": [
+      "1. zipper with args \u2192 zipper"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "3a9b175e70ca",
+    "timestamp": "2025-09-23T15:56:02",
+    "goal": "files op=write path=\"notes\\logs\\day1.txt\" content=\"Log start: system initialized\"",
+    "plan": [
+      "1. files with args \u2192 files"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Files are sandboxed to 'files.root'."
+  },
+  {
+    "id": "d73dcbe60b5f",
+    "timestamp": "2025-09-23T15:56:02",
+    "goal": "files op=write path=\"notes\\logs\\day2.md\" content=\"# Day 2\\nNotes about testing\"",
+    "plan": [
+      "1. files with args \u2192 files"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Files are sandboxed to 'files.root'."
+  },
+  {
+    "id": "69a5d1e0c28c",
+    "timestamp": "2025-09-23T15:56:02",
+    "goal": "files op=write path=\"notes\\logs\\day3.txt\" content=\"Backup and restore test entry\"",
+    "plan": [
+      "1. files with args \u2192 files"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Files are sandboxed to 'files.root'."
+  },
+  {
+    "id": "74f0805867bb",
+    "timestamp": "2025-09-23T15:56:02",
+    "goal": "zipper op=zip src=\"notes\" dest=\"backups\\full_notes_20250923_155602.zip\" include=\"*\" level=9",
+    "plan": [
+      "1. zipper with args \u2192 zipper"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "8cec0874c3b9",
+    "timestamp": "2025-09-23T15:56:03",
+    "goal": "zipper op=list src=\"backups\\full_notes_20250923_155602.zip\"",
+    "plan": [
+      "1. zipper with args \u2192 zipper"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "a30abfc8c94e",
+    "timestamp": "2025-09-23T15:56:03",
+    "goal": "zipper op=unzip src=\"backups\\full_notes_20250923_155602.zip\" dest=\"restore\\full_notes_20250923_155602\" overwrite=false",
+    "plan": [
+      "1. zipper with args \u2192 zipper"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "120791531792",
+    "timestamp": "2025-09-23T15:56:03",
+    "goal": "zipper op=unzip src=\"backups\\full_notes_20250923_155602.zip\" dest=\"restore\\full_notes_20250923_155602\" overwrite=true",
+    "plan": [
+      "1. zipper with args \u2192 zipper"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "fac7b6d19cf9",
+    "timestamp": "2025-09-23T15:57:13",
+    "goal": "files op=write path=\"notes\\logs\\day1.txt\" content=\"Log start: system initialized\"",
+    "plan": [
+      "1. files with args \u2192 files"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Files are sandboxed to 'files.root'."
+  },
+  {
+    "id": "2fe82cf5e18d",
+    "timestamp": "2025-09-23T15:57:13",
+    "goal": "files op=write path=\"notes\\logs\\day2.md\" content=\"# Day 2\\nNotes about testing\"",
+    "plan": [
+      "1. files with args \u2192 files"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Files are sandboxed to 'files.root'."
+  },
+  {
+    "id": "944a1bd05548",
+    "timestamp": "2025-09-23T15:57:13",
+    "goal": "files op=write path=\"notes\\logs\\day3.txt\" content=\"Backup and restore test entry\"",
+    "plan": [
+      "1. files with args \u2192 files"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Files are sandboxed to 'files.root'."
+  },
+  {
+    "id": "e58b4cd80886",
+    "timestamp": "2025-09-23T15:57:13",
+    "goal": "zipper op=zip src=\"notes\" dest=\"backups\\full_notes_20250923_155712.zip\" include=\"*\" level=9",
+    "plan": [
+      "1. zipper with args \u2192 zipper"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "e15d37be0bb3",
+    "timestamp": "2025-09-23T15:57:13",
+    "goal": "zipper op=list src=\"backups\\full_notes_20250923_155712.zip\"",
+    "plan": [
+      "1. zipper with args \u2192 zipper"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "0817cb747882",
+    "timestamp": "2025-09-23T15:57:13",
+    "goal": "zipper op=unzip src=\"backups\\full_notes_20250923_155712.zip\" dest=\"restore\\full_notes_20250923_155712\" overwrite=false",
+    "plan": [
+      "1. zipper with args \u2192 zipper"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  },
+  {
+    "id": "89e4546273ba",
+    "timestamp": "2025-09-23T15:57:13",
+    "goal": "zipper op=unzip src=\"backups\\full_notes_20250923_155712.zip\" dest=\"restore\\full_notes_20250923_155712\" overwrite=true",
+    "plan": [
+      "1. zipper with args \u2192 zipper"
+    ],
+    "outcome": "1:OK",
+    "reflection": "Run 1 actions | All OK: True | Indexed outputs to long-term memory."
+  }
+]

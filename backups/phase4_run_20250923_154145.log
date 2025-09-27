@@ -1,0 +1,10 @@
+
+==== STDOUT ====
+
+
+==== STDERR ====
+  File "<stdin>", line 2
+    files op=write path="notes\logs\day2.md" content="# Day 2
+                                                     ^
+SyntaxError: unterminated string literal (detected at line 2)
+

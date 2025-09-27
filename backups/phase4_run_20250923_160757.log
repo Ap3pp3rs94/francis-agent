@@ -1,0 +1,85 @@
+﻿
+==== STDOUT ====
+[2025-09-23T16:07:58] Francis ready. Tools: files, gitops, hello, httpjson, kvstore, search, shell, web, zipper
+
+Enter a goal (or 'help','mem','review','export','prune','tools','set dry_run on|off','profile on|off','status','health','selftest','sampleplan','runplan <path>','exit'): Plan:
+  1. files with args → files
+----------------------------------------------------------------------
+[files] ok=True meta={'bytes': 29}
+Wrote C:\Francis\agent\notes\logs\day1.txt
+----------------------------------------------------------------------
+Reflection:
+  Run 1 actions | All OK: True | Files are sandboxed to 'files.root'.
+Duration: 0.01s
+
+Enter a goal (or 'help','mem','review','export','prune','tools','set dry_run on|off','profile on|off','status','health','selftest','sampleplan','runplan <path>','exit'): Plan:
+  1. files with args → files
+----------------------------------------------------------------------
+[files] ok=True meta={'bytes': 28}
+Wrote C:\Francis\agent\notes\logs\day2.md
+----------------------------------------------------------------------
+Reflection:
+  Run 1 actions | All OK: True | Files are sandboxed to 'files.root'.
+Duration: 0.01s
+
+Enter a goal (or 'help','mem','review','export','prune','tools','set dry_run on|off','profile on|off','status','health','selftest','sampleplan','runplan <path>','exit'): Plan:
+  1. files with args → files
+----------------------------------------------------------------------
+[files] ok=True meta={'bytes': 29}
+Wrote C:\Francis\agent\notes\logs\day3.txt
+----------------------------------------------------------------------
+Reflection:
+  Run 1 actions | All OK: True | Files are sandboxed to 'files.root'.
+Duration: 0.01s
+
+Enter a goal (or 'help','mem','review','export','prune','tools','set dry_run on|off','profile on|off','status','health','selftest','sampleplan','runplan <path>','exit'): Plan:
+  1. zipper with args → zipper
+----------------------------------------------------------------------
+[zipper] ok=True meta={'files': 5, 'dest': 'C:\\Francis\\agent\\backups\\full_notes_20250923_160757.zip'}
+Zipped 5 file(s) → C:\Francis\agent\backups\full_notes_20250923_160757.zip
+----------------------------------------------------------------------
+Reflection:
+  Run 1 actions | All OK: True | Indexed outputs to long-term memory.
+Duration: 0.02s
+
+Enter a goal (or 'help','mem','review','export','prune','tools','set dry_run on|off','profile on|off','status','health','selftest','sampleplan','runplan <path>','exit'): Plan:
+  1. zipper with args → zipper
+----------------------------------------------------------------------
+[zipper] ok=True meta={'count': 5}
+hello.txt	8B
+readme.md	15B
+logs/day1.txt	29B
+logs/day2.md	28B
+logs/day3.txt	29B
+----------------------------------------------------------------------
+Reflection:
+  Run 1 actions | All OK: True | Indexed outputs to long-term memory.
+Duration: 0.02s
+
+Enter a goal (or 'help','mem','review','export','prune','tools','set dry_run on|off','profile on|off','status','health','selftest','sampleplan','runplan <path>','exit'): Plan:
+  1. zipper with args → zipper
+----------------------------------------------------------------------
+[zipper] ok=True meta={'files': 5, 'dest': 'C:\\Francis\\agent\\restore\\full_notes_20250923_160757'}
+Extracted 5 file(s) → C:\Francis\agent\restore\full_notes_20250923_160757
+----------------------------------------------------------------------
+Reflection:
+  Run 1 actions | All OK: True | Indexed outputs to long-term memory.
+Duration: 0.01s
+
+Enter a goal (or 'help','mem','review','export','prune','tools','set dry_run on|off','profile on|off','status','health','selftest','sampleplan','runplan <path>','exit'): Plan:
+  1. zipper with args → zipper
+----------------------------------------------------------------------
+[zipper] ok=True meta={'files': 5, 'dest': 'C:\\Francis\\agent\\restore\\full_notes_20250923_160757'}
+Extracted 5 file(s) → C:\Francis\agent\restore\full_notes_20250923_160757
+----------------------------------------------------------------------
+Reflection:
+  Run 1 actions | All OK: True | Indexed outputs to long-term memory.
+Duration: 0.01s
+
+Enter a goal (or 'help','mem','review','export','prune','tools','set dry_run on|off','profile on|off','status','health','selftest','sampleplan','runplan <path>','exit'): Exported: memory_20250923_160758.json, francis_20250923_160758.sqlite
+
+Enter a goal (or 'help','mem','review','export','prune','tools','set dry_run on|off','profile on|off','status','health','selftest','sampleplan','runplan <path>','exit'): Goodbye!
+
+
+==== STDERR ====
+

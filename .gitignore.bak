@@ -1,0 +1,6 @@
+# venvs / build output
+.venv*
+venv*
+dist/
+build/
+__pycache__/

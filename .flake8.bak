@@ -1,0 +1,2 @@
+[flake8]
+exclude = .venv*,venv*,dist,build,__pycache__

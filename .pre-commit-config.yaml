@@ -1,17 +1,23 @@
 repos:
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.3.0
-    hooks:
-      - id: flake8
-
   - repo: https://github.com/psf/black
-    rev: 25.9.0
+    rev: 24.8.0
     hooks:
       - id: black
+        files: ^(francis|tests)/
+        exclude: ^(dist/|build/|\.venv.*|venv/|.*site-packages/|.*\.egg-info/|\.mypy_cache/|\.pytest_cache/)
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        files: ^(francis|tests)/
+        additional_dependencies: [flake8-bugbear]
+        exclude: ^(dist/|build/|\.venv.*|venv/|.*site-packages/|.*\.egg-info/|\.mypy_cache/|\.pytest_cache/)
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.18.2
+    rev: v1.10.0
     hooks:
       - id: mypy
-        # only check core for now; tools/ etc. excluded
-        files: ^(francis\.py|tests/.*\.py)$
+        files: ^(francis|tests)/
+        args: [--config-file, mypy.ini]
+        exclude: ^(dist/|build/|\.venv.*|venv/|.*site-packages/|.*\.egg-info/|\.mypy_cache/|\.pytest_cache/)

@@ -24,7 +24,6 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     # TODO: start the real agent loop here
-    # run_agent()
     return 0
 
 

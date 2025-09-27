@@ -1,16 +1,18 @@
 [flake8]
-# Match Black defaults + temporarily suppress E701/E702 (multiple statements per line)
 max-line-length = 88
-extend-ignore = E203, E266, E501, E701, E702, W503, W605
-
-# Skip junk / generated dirs
-exclude = .venv, venv, env, build, dist, logs, backups, restore, data, __pycache__
-
-# Targeted relaxations for legacy files (we'll remove later)
-per-file-ignores =
-    francis.backup.py: F401,F841,E701,E702,E703,W605
-    tools/*.py: E701,E702
-    backfill_mem_index.py: E401
-    long_memory.py: E401
-    francis.py: F401
-    tools/kvstore.py: F401
+extend-ignore = E203, W503
+extend-exclude =
+    .venv,
+    .venv-*,
+    venv,
+    dist,
+    build,
+    .mypy_cache,
+    .pytest_cache,
+    *.egg-info,
+    **/site-packages/*,
+    tools,
+    backfill_mem_index.py,
+    francis.backup.py,
+    long_memory.py,
+    reflection_memory.py

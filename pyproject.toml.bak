@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "francis-agent"
+version = "1.0.7"
+description = "Local autonomy loop with tools"
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Ap3pp3rs94" }]
+requires-python = ">=3.11"
+
+license-files = ['LICENSE']
+
+[project.urls]
+Homepage = "https://github.com/Ap3pp3rs94/francis-agent"
+
+[tool.setuptools]
+py-modules = ["francis"]
+
+[tool.setuptools.packages.find]
+include = ["tools", "tools.*"]
+
+
+
+
+
+[tool.poetry]
+package-mode = true
+packages = [{ include = "francis" }]
+
+
+
+
+
+include = ["francis/**", "README.md", "LICENSE*"]
+
+
+
+[project.scripts]
+francis = "francis:entrypoint"
+
